@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390px">
+<title>FinFlow v2 Storyboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060810;
+  --bg2: #0c0f1a;
+  --surface: #111520;
+  --surface2: #181d2e;
+  --surface3: #1e2438;
+  --accent: #00f5b0;
+  --accent-dim: rgba(0,245,176,0.12);
+  --accent2: #5b8dff;
+  --accent3: #ff6b6b;
+  --gold: #ffd166;
+  --purple: #a78bfa;
+  --text: #eef0f8;
+  --text2: #8892b0;
+  --text3: #3d4461;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(0,245,176,0.15);
+  --red: #ff5252;
+  --warn: #ffb347;
+  --glow: 0 0 40px rgba(0,245,176,0.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#000;font-family:'Outfit',sans-serif;}
+
+.phone{
+  width:390px;height:844px;
+  background:var(--bg);
+  position:relative;overflow:hidden;
+  display:none;
+}
+.phone.active{display:block;}
+
+/* Noise texture overlay */
+.phone::before{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:100;opacity:0.4;
+}
+
+/* ── STATUS BAR ── */
+.sb{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 24px 0;font-size:11px;font-weight:600;
+  color:var(--text2);letter-spacing:.3px;
+}
+.sb .t{font-family:'DM Mono',monospace;font-size:14px;color:var(--text);font-weight:500;}
+.sb-r{display:flex;gap:5px;align-items:center;font-size:11px;}
+
+/* ── SHARED ── */
+.sec-lbl{
+  font-size:10px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);
+}
+.mono{font-family:'DM Mono',monospace;}
+.tag{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 1 — SPLASH
+══════════════════════════════════════════ */
+#s1 .inner{
+  height:100%;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,245,176,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(91,141,255,0.1) 0%, transparent 50%),
+    var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 32px;
+}
+.orb{
+  width:110px;height:110px;border-radius:50%;
+  background:conic-gradient(from 200deg, #00f5b0 0%, #5b8dff 30%, #00f5b0 60%, #a78bfa 80%, #00f5b0 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 1px rgba(0,245,176,0.3), 0 0 60px rgba(0,245,176,0.3), 0 0 120px rgba(0,245,176,0.1);
+  margin-bottom:28px;position:relative;
+}
+.orb-inner{
+  width:88px;height:88px;border-radius:50%;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+}
+.orb-inner svg{width:42px;height:42px;}
+.brand{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:52px;letter-spacing:4px;
+  background:linear-gradient(135deg,#fff 0%,#00f5b0 60%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.tagline{
+  font-size:14px;color:var(--text2);
+  text-align:center;line-height:1.6;margin-top:8px;
+}
+.tagline em{color:var(--accent);font-style:normal;font-weight:600;}
+.feature-pills{
+  display:flex;flex-wrap:wrap;gap:8px;
+  justify-content:center;margin-top:32px;
+}
+.fp{
+  padding:7px 14px;border-radius:20px;
+  background:var(--surface2);border:1px solid var(--border);
+  font-size:12px;color:var(--text2);font-weight:500;
+}
+.fp.hi{background:rgba(0,245,176,0.08);border-color:var(--border2);color:var(--accent);}
+.cta{
+  margin-top:36px;width:100%;padding:17px;
+  background:var(--accent);border:none;border-radius:14px;
+  font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;
+  color:#001a0d;letter-spacing:.5px;cursor:pointer;
+  box-shadow:0 8px 32px rgba(0,245,176,0.3);
+}
+.signin{margin-top:12px;font-size:13px;color:var(--text3);text-align:center;}
+.signin span{color:var(--accent2);}
+
+/* ══════════════════════════════════════════
+   SCREEN 2 — BIOMETRIC
+══════════════════════════════════════════ */
+#s2 .inner{background:var(--bg);height:100%;}
+#s2 .content{padding:24px;padding-top:32px;}
+.step-pills{display:flex;gap:6px;margin-bottom:28px;}
+.sp{height:3px;border-radius:2px;flex:1;background:var(--surface3);}
+.sp.done{background:var(--accent);}
+.sp.active{background:var(--accent);opacity:0.5;}
+.field-wrap{margin-bottom:14px;}
+.field-lbl{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+.field{
+  width:100%;padding:14px 16px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:12px;color:var(--text);font-size:15px;
+  font-family:'Outfit',sans-serif;
+}
+.field.ok{border-color:rgba(0,245,176,0.3);}
+.bio-card{
+  margin-top:24px;padding:20px;
+  background:linear-gradient(135deg, rgba(0,245,176,0.05), rgba(91,141,255,0.03));
+  border:1.5px solid var(--border2);border-radius:16px;
+  display:flex;align-items:center;gap:16px;
+}
+.bio-icon{
+  width:56px;height:56px;border-radius:14px;
+  background:rgba(0,245,176,0.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+}
+.bio-title{font-size:15px;font-weight:700;color:var(--text);}
+.bio-sub{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5;}
+.enrolled{
+  margin-top:12px;padding:12px 14px;
+  background:rgba(0,245,176,0.08);border:1px solid rgba(0,245,176,0.2);
+  border-radius:10px;display:flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--accent);
+}
+.lock-row{
+  margin-top:16px;padding:14px 16px;
+  background:rgba(91,141,255,0.06);border:1px solid rgba(91,141,255,0.15);
+  border-radius:10px;font-size:12px;color:var(--text2);line-height:1.6;
+}
+.lock-row strong{color:var(--accent2);}
+
+/* ══════════════════════════════════════════
+   SCREEN 3 — LINK BANK
+══════════════════════════════════════════ */
+#s3 .inner{background:var(--bg);height:100%;}
+#s3 .content{padding:24px;padding-top:28px;}
+.plaid-box{
+  margin-top:18px;background:var(--surface);
+  border-radius:18px;border:1px solid var(--border);overflow:hidden;
+}
+.plaid-head{
+  padding:16px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.plaid-head h3{font-size:14px;font-weight:700;color:var(--text);}
+.plaid-badge{
+  padding:3px 8px;background:rgba(0,245,176,0.1);
+  border:1px solid rgba(0,245,176,0.2);border-radius:6px;
+  font-size:10px;color:var(--accent);font-weight:600;
+}
+.bank-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;cursor:pointer;
+}
+.bank-row+.bank-row{border-top:1px solid var(--border);}
+.bank-row.sel{background:rgba(0,245,176,0.05);}
+.blogo{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.binfo{flex:1;}
+.bname{font-size:14px;font-weight:600;color:var(--text);}
+.btype{font-size:11px;color:var(--text3);margin-top:2px;}
+.scan-bar{
+  margin:14px 24px 0;padding:14px 16px;
+  background:var(--surface2);border-radius:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.scan-pulse{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 12px var(--accent);
+  flex-shrink:0;
+}
+.scan-text{font-size:12px;color:var(--text2);}
+.scan-text strong{color:var(--accent);}
+.connected-row{
+  margin:10px 24px 0;padding:14px 16px;
+  background:rgba(0,245,176,0.06);border:1px solid var(--border2);
+  border-radius:12px;font-size:12px;color:var(--accent);
+  line-height:1.7;font-weight:500;
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 4 — EMAIL + AHA
+══════════════════════════════════════════ */
+#s4 .inner{background:var(--bg);height:100%;position:relative;}
+#s4 .content{padding:24px;padding-top:24px;}
+.email-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:16px;padding:16px;margin-bottom:10px;
+}
+.ep{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--surface);border-radius:12px;cursor:pointer;
+}
+.ep+.ep{margin-top:8px;}
+.ep.g{border:1.5px solid rgba(234,67,53,0.25);}
+.ep.o{border:1.5px solid rgba(0,120,212,0.25);}
+.eico{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.ename{font-size:14px;font-weight:600;color:var(--text);}
+.esub{font-size:11px;color:var(--text3);margin-top:2px;}
+.ebtn{
+  padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;
+  border:none;cursor:pointer;white-space:nowrap;
+}
+.priv-note{
+  padding:14px 16px;background:rgba(91,141,255,0.05);
+  border:1px solid rgba(91,141,255,0.15);border-radius:12px;
+  font-size:11px;color:var(--text2);line-height:1.7;
+}
+.priv-note strong{color:var(--accent2);}
+/* AHA sheet */
+.aha{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(170deg, #001c12 0%, #000d08 100%);
+  border-top:1.5px solid rgba(0,245,176,0.35);
+  border-radius:24px 24px 0 0;
+  padding:24px;
+  box-shadow:0 -20px 60px rgba(0,245,176,0.15);
+}
+.aha-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;background:rgba(255,107,107,0.15);
+  border:1px solid rgba(255,107,107,0.3);border-radius:20px;
+  font-size:11px;color:#ff8a8a;font-weight:700;margin-bottom:14px;
+}
+.aha-h{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:var(--accent);line-height:1;}
+.aha-amt{font-family:'DM Mono',monospace;font-size:48px;font-weight:500;color:#fff;line-height:1.1;margin-top:4px;}
+.aha-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+.leak-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
+.lc{
+  padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;
+  background:rgba(255,82,82,0.12);border:1px solid rgba(255,82,82,0.25);color:#ff8a8a;
+}
+.aha-cta{
+  width:100%;margin-top:16px;padding:15px;
+  background:var(--accent);border:none;border-radius:12px;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;
+  color:#001a0d;cursor:pointer;
+  box-shadow:0 6px 24px rgba(0,245,176,0.25);
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 5 — MAIN DASHBOARD
+══════════════════════════════════════════ */
+#s5 .inner{
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(0,245,176,0.07) 0%, transparent 55%),
+    var(--bg);
+  height:100%;position:relative;
+}
+.dash-top{
+  padding:18px 22px 0;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.greet{font-size:12px;color:var(--text3);}
+.uname{font-size:19px;font-weight:800;color:var(--text);}
+.notif-orb{
+  position:relative;width:38px;height:38px;
+  background:var(--surface2);border-radius:11px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.ndot{
+  position:absolute;top:7px;right:7px;
+  width:7px;height:7px;background:var(--red);border-radius:50%;
+  border:2px solid var(--bg);
+}
+/* NW card */
+.nw{
+  margin:14px 22px 0;padding:18px 20px;
+  background:linear-gradient(135deg, var(--surface) 0%, #0f1420 100%);
+  border:1px solid var(--border);border-radius:18px;
+  position:relative;overflow:hidden;
+}
+.nw::after{
+  content:'';position:absolute;
+  top:-40px;right:-40px;
+  width:120px;height:120px;
+  background:radial-gradient(circle, rgba(0,245,176,0.08), transparent 70%);
+  pointer-events:none;
+}
+.nw-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);}
+.nw-val{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;color:var(--text);margin-top:2px;}
+.nw-delta{
+  display:inline-flex;align-items:center;gap:5px;margin-top:4px;
+  padding:4px 10px;background:rgba(0,245,176,0.1);border-radius:20px;
+  font-size:12px;font-weight:700;color:var(--accent);
+}
+.spark{height:36px;margin-top:10px;}
+.spark svg{width:100%;height:36px;}
+/* STS hero */
+.sts-wrap{margin:16px 22px 0;}
+.sts-row{display:flex;align-items:center;gap:16px;}
+.sts-ring{
+  position:relative;width:130px;height:130px;flex-shrink:0;
+}
+.sts-ring svg{width:130px;height:130px;}
+.sts-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.sts-val{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--accent);}
+.sts-lbl2{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.sts-details{flex:1;}
+.sdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.sdbar{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.sdfill{height:100%;border-radius:3px;}
+.sdlbl{font-size:10px;color:var(--text3);white-space:nowrap;min-width:70px;}
+/* Account cards */
+.accs{display:flex;gap:10px;padding:10px 22px;overflow-x:auto;}
+.accs::-webkit-scrollbar{display:none;}
+.acc{
+  min-width:130px;padding:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;flex-shrink:0;
+}
+.acc-dot{width:6px;height:6px;border-radius:50%;margin-bottom:10px;}
+.acc-n{font-size:11px;color:var(--text3);}
+.acc-v{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;color:var(--text);margin-top:2px;}
+.acc-s{font-size:10px;color:var(--text3);margin-top:2px;}
+/* Nav */
+.nav{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(17,21,32,0.95);
+  backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;
+  padding:10px 0 22px;
+}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.ni-ico{font-size:18px;opacity:.35;}
+.ni-ico.on{opacity:1;}
+.ni-lbl{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;}
+.ni-lbl.on{color:var(--accent);}
+
+/* ══════════════════════════════════════════
+   SCREEN 6 — CASHFLOW
+══════════════════════════════════════════ */
+#s6 .inner{background:var(--bg);height:100%;position:relative;}
+#s6 .cf-top{padding:18px 22px 0;}
+.cf-toggle{display:flex;gap:6px;margin-top:14px;}
+.ctb{
+  padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  background:var(--surface2);color:var(--text3);border:none;cursor:pointer;
+}
+.ctb.on{
+  background:rgba(0,245,176,0.12);color:var(--accent);
+  border:1px solid rgba(0,245,176,0.25);
+}
+.chart-wrap{
+  margin:14px 22px 0;padding:18px;
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;
+}
+.chart-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;}
+.chart-net{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);letter-spacing:1px;}
+.chart-mo{font-size:11px;color:var(--text3);}
+.bars{display:flex;align-items:flex-end;gap:6px;height:90px;}
+.bg{display:flex;gap:2px;flex:1;align-items:flex-end;}
+.bi{border-radius:5px 5px 0 0;flex:1;}
+.bi.inc{background:linear-gradient(180deg,var(--accent),rgba(0,245,176,0.3));}
+.bi.spd{background:linear-gradient(180deg,var(--accent2),rgba(91,141,255,0.3));}
+.blbls{display:flex;gap:6px;margin-top:6px;}
+.blbl{flex:1;font-size:9px;color:var(--text3);text-align:center;}
+.leg{display:flex;gap:14px;margin-top:10px;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
+.ld{width:8px;height:8px;border-radius:2px;}
+/* projection */
+.proj-wrap{
+  margin:10px 22px 0;padding:18px;
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;
+}
+.proj-hdr{font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:600;}
+.proj-bubbles{display:flex;gap:8px;}
+.pb{
+  flex:1;padding:10px 8px;text-align:center;
+  background:var(--surface2);border-radius:10px;border:1px solid var(--border);
+}
+.pb-val{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.5px;}
+.pb-lbl{font-size:9px;color:var(--text3);margin-top:2px;font-weight:600;letter-spacing:.5px;}
+/* email feed */
+.inbox-lbl{
+  margin:12px 22px 4px;font-size:10px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;color:var(--text3);
+}
+.bill-card{
+  margin:6px 22px 0;padding:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;display:flex;align-items:center;gap:12px;
+}
+.bc-ico{
+  width:40px;height:40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.bc-info{flex:1;}
+.bc-n{font-size:13px;font-weight:600;color:var(--text);}
+.bc-m{font-size:11px;color:var(--text3);margin-top:2px;}
+.bc-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 7px;border-radius:5px;font-size:10px;font-weight:700;margin-top:4px;
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 7 — SPEND CHECK
+══════════════════════════════════════════ */
+#s7 .inner{background:var(--bg);height:100%;}
+#s7 .content{padding:24px;height:100%;display:flex;flex-direction:column;}
+.afford-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.afford-inp{
+  width:100%;padding:16px;
+  background:var(--surface2);
+  border:1.5px solid rgba(0,245,176,0.2);border-radius:13px;
+  font-size:16px;font-weight:600;color:var(--text);
+  font-family:'Outfit',sans-serif;margin-bottom:10px;
+}
+.afford-amt{
+  width:100%;padding:16px;text-align:center;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:13px;
+  font-family:'Bebas Neue',sans-serif;font-size:48px;
+  color:var(--accent);letter-spacing:2px;margin-bottom:20px;
+}
+.verdict{
+  flex:1;border-radius:20px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:24px;
+  background:linear-gradient(160deg, #001c10 0%, #000c08 100%);
+  border:1.5px solid rgba(0,245,176,0.3);
+  box-shadow:inset 0 0 60px rgba(0,245,176,0.04), 0 0 40px rgba(0,245,176,0.08);
+}
+.v-word{
+  font-family:'Bebas Neue',sans-serif;font-size:80px;
+  letter-spacing:4px;line-height:1;
+  background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.v-sub{font-size:13px;color:rgba(0,245,176,0.65);margin-top:10px;line-height:1.7;}
+.v-sub strong{color:var(--accent);}
+.impact-grid{display:flex;gap:8px;margin-top:18px;width:100%;}
+.igc{
+  flex:1;padding:12px 8px;text-align:center;
+  background:rgba(0,245,176,0.05);border-radius:12px;
+  border:1px solid rgba(0,245,176,0.12);
+}
+.igv{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:.5px;}
+.igl{font-size:10px;color:var(--text3);margin-top:3px;font-weight:600;}
+
+/* ══════════════════════════════════════════
+   SCREEN 8 — ALERTS
+══════════════════════════════════════════ */
+#s8 .inner{background:var(--bg);height:100%;position:relative;}
+#s8 .content{padding:22px;}
+.alert-card{
+  padding:14px;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;margin-bottom:8px;
+  display:flex;gap:11px;
+}
+.al-ico{
+  width:40px;height:40px;border-radius:11px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.al-body{flex:1;}
+.al-title{font-size:13px;font-weight:700;color:var(--text);}
+.al-desc{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.55;}
+.al-desc strong{color:var(--text);}
+.al-time{font-size:10px;color:var(--text3);margin-top:5px;}
+.al-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;
+  border:none;cursor:pointer;margin-top:7px;
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 9 — SUBSCRIPTION AUDIT (NEW ZING)
+══════════════════════════════════════════ */
+#s9 .inner{background:var(--bg);height:100%;position:relative;}
+#s9 .content{padding:22px;}
+.sub-total-card{
+  padding:20px;
+  background:linear-gradient(135deg, #1a0505 0%, #0d0202 100%);
+  border:1.5px solid rgba(255,82,82,0.25);border-radius:18px;
+  margin-bottom:14px;
+}
+.sub-total-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,82,82,0.6);}
+.sub-total-val{font-family:'Bebas Neue',sans-serif;font-size:52px;color:#ff8a8a;letter-spacing:2px;line-height:1;margin-top:4px;}
+.sub-total-yr{font-size:13px;color:rgba(255,82,82,0.5);margin-top:2px;}
+.sub-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.sr-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.sr-info{flex:1;}
+.sr-n{font-size:13px;font-weight:600;color:var(--text);}
+.sr-m{font-size:11px;color:var(--text3);}
+.sr-amt{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text2);}
+.sr-cancel{
+  padding:5px 10px;border-radius:7px;font-size:10px;font-weight:700;
+  background:rgba(255,82,82,0.12);color:#ff8a8a;border:1px solid rgba(255,82,82,0.2);cursor:pointer;
+}
+.sr-keep{
+  padding:5px 10px;border-radius:7px;font-size:10px;font-weight:700;
+  background:rgba(0,245,176,0.08);color:var(--accent);border:1px solid var(--border2);cursor:pointer;
+}
+.cancel-all-btn{
+  width:100%;margin-top:14px;padding:15px;
+  background:linear-gradient(135deg, #ff5252, #c0392b);border:none;border-radius:12px;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;color:#fff;cursor:pointer;
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 10 — TRIP MODE (NEW ZING)
+══════════════════════════════════════════ */
+#s10 .inner{
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(91,141,255,0.12) 0%, transparent 55%),
+    var(--bg);
+  height:100%;position:relative;
+}
+#s10 .content{padding:22px;}
+.trip-hero{
+  padding:20px;margin-bottom:14px;
+  background:linear-gradient(135deg, #050d1a 0%, #020810 100%);
+  border:1.5px solid rgba(91,141,255,0.25);border-radius:18px;
+  position:relative;overflow:hidden;
+}
+.trip-hero::before{
+  content:'✈';position:absolute;right:-10px;top:-10px;
+  font-size:80px;opacity:0.06;
+}
+.trip-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;background:rgba(91,141,255,0.12);
+  border:1px solid rgba(91,141,255,0.25);border-radius:20px;
+  font-size:10px;color:var(--accent2);font-weight:700;margin-bottom:10px;
+}
+.trip-title{font-size:18px;font-weight:800;color:var(--text);}
+.trip-dates{font-size:12px;color:var(--text3);margin-top:3px;}
+.trip-budget-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px;}
+.trip-spent{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--text);}
+.trip-budget-lbl{font-size:10px;color:var(--text3);font-weight:600;}
+.trip-limit{font-size:13px;color:var(--text2);font-family:'DM Mono',monospace;}
+.trip-progress{
+  height:8px;background:var(--surface3);border-radius:4px;margin-top:8px;overflow:hidden;
+}
+.trip-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent2),var(--accent));}
+.trip-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.tc{
+  padding:12px;background:var(--surface2);border-radius:12px;
+  border:1px solid var(--border);
+}
+.tc-ico{font-size:18px;margin-bottom:6px;}
+.tc-lbl{font-size:10px;color:var(--text3);font-weight:600;}
+.tc-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);margin-top:2px;}
+.tc-bar{height:4px;background:var(--surface3);border-radius:2px;margin-top:6px;overflow:hidden;}
+.tc-fill{height:100%;border-radius:2px;}
+.itinerary{margin-top:14px;}
+.it-row{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.it-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:44px;}
+.it-event{font-size:13px;font-weight:600;color:var(--text);}
+.it-amt{font-size:12px;color:var(--text2);margin-left:auto;font-family:'DM Mono',monospace;}
+
+/* ══════════════════════════════════════════
+   SCREEN 11 — PREMIUM UPSELL
+══════════════════════════════════════════ */
+#s11 .inner{
+  background:
+    radial-gradient(ellipse 80% 40% at 50% -5%, rgba(255,209,102,0.08) 0%, transparent 55%),
+    var(--bg);
+  height:100%;position:relative;
+}
+#s11 .content{padding:22px;}
+.prem-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;
+  background:linear-gradient(135deg,rgba(255,209,102,0.15),rgba(255,179,71,0.1));
+  border:1px solid rgba(255,209,102,0.25);border-radius:20px;
+  font-size:11px;font-weight:700;color:var(--gold);margin-bottom:18px;
+}
+.plan{
+  padding:18px;border-radius:18px;margin-bottom:10px;
+  border:1.5px solid var(--border);background:var(--surface);
+}
+.plan.feat{
+  border-color:rgba(0,245,176,0.35);
+  background:linear-gradient(135deg, rgba(0,245,176,0.04), rgba(91,141,255,0.02));
+}
+.plan-name{font-size:16px;font-weight:800;color:var(--text);}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:1px;margin-top:2px;}
+.plan-price span{font-size:14px;color:var(--text3);}
+.plan-feats{margin-top:12px;}
+.pf{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px;color:var(--text2);}
+.pf-check{color:var(--accent);font-weight:800;font-size:13px;}
+.pf-x{color:var(--text3);opacity:.4;}
+.up-btn{
+  width:100%;margin-top:10px;padding:16px;
+  background:var(--accent);border:none;border-radius:12px;
+  font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;
+  color:#001a0d;cursor:pointer;
+  box-shadow:0 6px 24px rgba(0,245,176,0.25);
+}
+.savings-pill{
+  text-align:center;margin-top:8px;
+  font-size:11px;color:var(--text3);
+}
+.savings-pill em{color:var(--accent);font-style:normal;font-weight:600;}
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     S1: SPLASH
+════════════════════════════════ -->
+<div class="phone" id="s1">
+<div class="inner">
+  <div class="sb"><span class="t">9:41</span><div class="sb-r">●●● WiFi 🔋</div></div>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100% - 40px);padding:32px;">
+    <div class="orb">
+      <div class="orb-inner">
+        <svg viewBox="0 0 42 42" fill="none">
+          <path d="M8 21 Q14 8 21 14 Q28 21 21 28 Q14 35 21 42" stroke="#00f5b0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <circle cx="21" cy="14" r="3.5" fill="#00f5b0"/>
+          <circle cx="21" cy="28" r="2.5" fill="#00f5b0" opacity=".5"/>
+          <circle cx="8" cy="21" r="2" fill="#5b8dff" opacity=".7"/>
+        </svg>
+      </div>
+    </div>
+    <div class="brand">FINFLOW</div>
+    <div class="tagline">Your <em>Proactive Financial</em> Wingman<br>Know where you stand. Always.</div>
+    <div class="feature-pills">
+      <div class="fp hi">🧠 AI-Powered</div>
+      <div class="fp hi">📧 Email Intelligence</div>
+      <div class="fp">🏦 12,000+ Banks</div>
+      <div class="fp">🔒 Bank-Grade Security</div>
+      <div class="fp">⚡ Safe to Spend</div>
+    </div>
+    <button class="cta">Get Started Free →</button>
+    <div class="signin">Already have an account? <span>Sign in</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S2: BIOMETRIC
+════════════════════════════════ -->
+<div class="phone" id="s2">
+<div class="inner">
+  <div class="sb"><span class="t">9:41</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div class="step-pills">
+      <div class="sp done"></div><div class="sp done"></div>
+      <div class="sp active"></div><div class="sp"></div><div class="sp"></div>
+    </div>
+    <div style="font-size:28px;margin-bottom:14px;">👋</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;color:var(--text);line-height:1.1;">CREATE YOUR<br>ACCOUNT</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:24px;margin-top:6px;">Bank-grade security from the first tap</div>
+    <div class="field-wrap">
+      <div class="field-lbl">Full Name</div>
+      <input class="field ok" value="Maya Patel" readonly>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Email Address</div>
+      <input class="field ok" value="maya@example.com" readonly>
+    </div>
+    <div class="bio-card">
+      <div class="bio-icon">🔐</div>
+      <div>
+        <div class="bio-title">Enable Face ID</div>
+        <div class="bio-sub">No password needed. Your face is your key to bank-grade security.</div>
+      </div>
+    </div>
+    <div class="enrolled">✅ &nbsp;Face ID enrolled — you're protected</div>
+    <div class="lock-row"><strong>🔒 Zero-credential architecture</strong> · 256-bit AES · SOC 2 Type II · GDPR compliant · Biometric only</div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S3: LINK BANK
+════════════════════════════════ -->
+<div class="phone" id="s3">
+<div class="inner">
+  <div class="sb"><span class="t">9:41</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div class="step-pills">
+      <div class="sp done"></div><div class="sp done"></div><div class="sp done"></div>
+      <div class="sp active"></div><div class="sp"></div>
+    </div>
+    <div style="font-size:28px;margin-bottom:12px;">🏦</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;color:var(--text);">LINK YOUR<br>PRIMARY BANK</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:0;margin-top:4px;">12,000+ institutions · read-only · revoke anytime</div>
+    <div class="plaid-box">
+      <div class="plaid-head">
+        <h3>Select your bank</h3>
+        <div class="plaid-badge">🔒 Encrypted</div>
+      </div>
+      <div class="bank-row sel">
+        <div class="blogo" style="background:#003087;">CHASE</div>
+        <div class="binfo"><div class="bname">Chase Bank</div><div class="btype">Checking · Savings · Credit</div></div>
+        <span style="color:var(--accent);font-size:17px;">✓</span>
+      </div>
+      <div class="bank-row">
+        <div class="blogo" style="background:#c0392b;">BofA</div>
+        <div class="binfo"><div class="bname">Bank of America</div><div class="btype">All account types</div></div>
+      </div>
+      <div class="bank-row">
+        <div class="blogo" style="background:#1a9c3e;">TD</div>
+        <div class="binfo"><div class="bname">TD Bank</div><div class="btype">Checking · Savings</div></div>
+      </div>
+    </div>
+    <div class="scan-bar">
+      <div class="scan-pulse"></div>
+      <div class="scan-text">Scanning for <strong>hidden subscriptions</strong>…</div>
+    </div>
+    <div class="connected-row">
+      🔗 &nbsp;Chase Checking ✓ &nbsp;·&nbsp; Savings ✓ &nbsp;·&nbsp; Freedom Card ✓<br>
+      <span style="color:var(--text3);">3 accounts synced in 2.1s</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S4: EMAIL + AHA
+════════════════════════════════ -->
+<div class="phone" id="s4">
+<div class="inner">
+  <div class="sb"><span class="t">9:42</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--text);">UNLOCK EMAIL<br>INTELLIGENCE</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;margin-top:4px;">We scan for bills, subscriptions &amp; receipts</div>
+    <div class="email-card">
+      <div class="ep g">
+        <div class="eico" style="background:rgba(234,67,53,0.1);">G</div>
+        <div style="flex:1;"><div class="ename">Gmail</div><div class="esub" style="color:#ea4335;">Connected ✓</div></div>
+        <button class="ebtn" style="background:rgba(0,245,176,0.1);color:var(--accent);">✓ Done</button>
+      </div>
+      <div class="ep o" style="margin-top:8px;">
+        <div class="eico" style="background:rgba(0,120,212,0.1);color:#0078d4;">⊞</div>
+        <div style="flex:1;"><div class="ename">Outlook</div><div class="esub">Microsoft 365</div></div>
+        <button class="ebtn" style="background:rgba(0,120,212,0.12);color:#4da6ff;">Connect</button>
+      </div>
+    </div>
+    <div class="priv-note">
+      <strong>🔒 Privacy First</strong> · FinFlow never reads personal emails. On-device NLP filters only financial signals. Zero email content stored on servers. Revoke access anytime.
+    </div>
+  </div>
+  <!-- AHA SHEET -->
+  <div class="aha">
+    <div class="aha-pill">💸 MONEY LEAK DETECTED</div>
+    <div class="aha-h">BOOM! WE FOUND</div>
+    <div class="aha-amt">$42.99<span style="font-size:22px;color:rgba(255,255,255,0.3)">/mo</span></div>
+    <div class="aha-sub">in forgotten subscriptions · <strong style="color:#ff8a8a;">$515/year wasted</strong></div>
+    <div class="leak-chips">
+      <div class="lc">📺 Netflix $15.99</div>
+      <div class="lc">💪 Planet Fitness $24.99</div>
+      <div class="lc">+ 1 more…</div>
+    </div>
+    <button class="aha-cta">Review &amp; Cancel in 1 Tap →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S5: MAIN DASHBOARD
+════════════════════════════════ -->
+<div class="phone" id="s5">
+<div class="inner">
+  <div class="sb"><span class="t">9:43</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="dash-top">
+    <div><div class="greet">Good morning,</div><div class="uname">Maya 👋</div></div>
+    <div class="notif-orb">🔔<div class="ndot"></div></div>
+  </div>
+  <!-- Net Worth Card -->
+  <div class="nw">
+    <div class="nw-lbl">Net Worth</div>
+    <div class="nw-val">$142,840</div>
+    <div class="nw-delta">↑ +$2,340 this month &nbsp;·&nbsp; +1.67%</div>
+    <div class="spark">
+      <svg viewBox="0 0 320 36" fill="none">
+        <defs>
+          <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00f5b0" stop-opacity=".25"/>
+            <stop offset="100%" stop-color="#00f5b0" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,32 Q40,27 80,22 Q120,15 160,17 Q200,19 240,9 Q270,3 320,2" stroke="#00f5b0" stroke-width="2" fill="none"/>
+        <path d="M0,32 Q40,27 80,22 Q120,15 160,17 Q200,19 240,9 Q270,3 320,2 L320,36 L0,36Z" fill="url(#sg2)"/>
+        <circle cx="320" cy="2" r="3.5" fill="#00f5b0"/>
+      </svg>
+    </div>
+  </div>
+  <!-- Safe to Spend -->
+  <div class="sts-wrap">
+    <div class="sec-lbl" style="margin-bottom:10px;">Safe to Spend</div>
+    <div class="sts-row">
+      <div class="sts-ring">
+        <svg viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="56" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+          <circle cx="65" cy="65" r="56" fill="none" stroke="#00f5b0"
+            stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="351.9" stroke-dashoffset="112.6"
+            transform="rotate(-90 65 65)"/>
+          <circle cx="65" cy="65" r="56" fill="none" stroke="rgba(91,141,255,0.35)"
+            stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="351.9" stroke-dashoffset="316.7"
+            transform="rotate(-90 65 65)"/>
+        </svg>
+        <div class="sts-center">
+          <div class="sts-val">$420</div>
+          <div class="sts-lbl2">available</div>
+        </div>
+      </div>
+      <div class="sts-details">
+        <div class="sec-lbl" style="margin-bottom:8px;">LOCKED FOR</div>
+        <div class="sdr">
+          <div class="sdbar"><div class="sdfill" style="width:60%;background:var(--warn);"></div></div>
+          <div class="sdlbl">Rent $1,800</div>
+        </div>
+        <div class="sdr">
+          <div class="sdbar"><div class="sdfill" style="width:20%;background:var(--accent2);"></div></div>
+          <div class="sdlbl">Comcast $89</div>
+        </div>
+        <div class="sdr">
+          <div class="sdbar"><div class="sdfill" style="width:35%;background:var(--accent);"></div></div>
+          <div class="sdlbl">Savings $300</div>
+        </div>
+        <div style="margin-top:6px;padding:7px 10px;background:rgba(0,245,176,0.06);border-radius:8px;font-size:10px;color:var(--accent);font-weight:600;">
+          ✓ All bills covered through Oct 31
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Accounts -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:0 22px;margin-top:14px;">
+    <div class="sec-lbl">Accounts</div>
+    <div style="font-size:11px;color:var(--accent2);">See all →</div>
+  </div>
+  <div class="accs">
+    <div class="acc"><div class="acc-dot" style="background:var(--accent);"></div><div class="acc-n">Chase Checking</div><div class="acc-v">$4,210</div><div class="acc-s">Updated now</div></div>
+    <div class="acc"><div class="acc-dot" style="background:var(--accent2);"></div><div class="acc-n">HYSA</div><div class="acc-v">$12,400</div><div class="acc-s">4.8% APY</div></div>
+    <div class="acc"><div class="acc-dot" style="background:var(--warn);"></div><div class="acc-n">Chase Freedom</div><div class="acc-v" style="color:var(--red);">-$840</div><div class="acc-s">Due Oct 15</div></div>
+    <div class="acc"><div class="acc-dot" style="background:var(--purple);"></div><div class="acc-n">401(k)</div><div class="acc-v">$85.2k</div><div class="acc-s">Fidelity</div></div>
+  </div>
+  <div class="nav">
+    <div class="ni"><div class="ni-ico on">⊞</div><div class="ni-lbl on">Home</div></div>
+    <div class="ni"><div class="ni-ico">📊</div><div class="ni-lbl">Flow</div></div>
+    <div class="ni"><div class="ni-ico">📅</div><div class="ni-lbl">Bills</div></div>
+    <div class="ni"><div class="ni-ico">👤</div><div class="ni-lbl">Profile</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S6: CASHFLOW
+════════════════════════════════ -->
+<div class="phone" id="s6">
+<div class="inner">
+  <div class="sb"><span class="t">9:44</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="cf-top">
+    <div class="sec-lbl">Cash Flow</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--text);margin-top:4px;">SMART MONEY<br>INSIGHTS</div>
+    <div class="cf-toggle">
+      <button class="ctb on">Monthly</button>
+      <button class="ctb">Weekly</button>
+      <button class="ctb">Daily</button>
+    </div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-header">
+      <div>
+        <div class="sec-lbl">NET THIS MONTH</div>
+        <div class="chart-net">+$1,840</div>
+      </div>
+      <div class="chart-mo">Oct 2026</div>
+    </div>
+    <div class="bars">
+      <div class="bg"><div class="bi inc" style="height:82px;"></div><div class="bi spd" style="height:58px;"></div></div>
+      <div class="bg"><div class="bi inc" style="height:78px;"></div><div class="bi spd" style="height:66px;"></div></div>
+      <div class="bg"><div class="bi inc" style="height:82px;"></div><div class="bi spd" style="height:54px;"></div></div>
+      <div class="bg"><div class="bi inc" style="height:82px;"></div><div class="bi spd" style="height:70px;"></div></div>
+      <div class="bg"><div class="bi inc" style="height:78px;"></div><div class="bi spd" style="height:46px;"></div></div>
+      <div class="bg"><div class="bi inc" style="height:82px;"></div><div class="bi spd" style="height:60px;"></div></div>
+    </div>
+    <div class="blbls"><div class="blbl">May</div><div class="blbl">Jun</div><div class="blbl">Jul</div><div class="blbl">Aug</div><div class="blbl">Sep</div><div class="blbl">Oct</div></div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:var(--accent);"></div>Income $7,200</div>
+      <div class="li"><div class="ld" style="background:var(--accent2);"></div>Spend $5,360</div>
+    </div>
+  </div>
+  <!-- Projection -->
+  <div class="proj-wrap">
+    <div class="proj-hdr">📈 Cash Position Projection</div>
+    <svg viewBox="0 0 320 70" fill="none" style="width:100%;height:70px;margin-bottom:10px;">
+      <defs>
+        <linearGradient id="pg2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00f5b0" stop-opacity=".15"/>
+          <stop offset="100%" stop-color="#00f5b0" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M155,42 Q210,30 320,18 L320,52 Q210,58 155,52Z" fill="rgba(91,141,255,0.08)"/>
+      <path d="M0,60 Q40,54 80,48 Q120,42 155,42" stroke="#00f5b0" stroke-width="2.5" fill="none"/>
+      <path d="M0,60 Q40,54 80,48 Q120,42 155,42 L155,66 L0,66Z" fill="url(#pg2)"/>
+      <path d="M155,42 Q210,30 320,18" stroke="#5b8dff" stroke-width="2" stroke-dasharray="5,4" fill="none"/>
+      <circle cx="155" cy="42" r="4.5" fill="#00f5b0" stroke="#060810" stroke-width="2"/>
+      <text x="120" y="36" font-size="8" fill="#00f5b0" font-family="monospace">TODAY</text>
+      <text x="262" y="13" font-size="8" fill="#5b8dff" font-family="monospace">+$4.2k</text>
+    </svg>
+    <div class="proj-bubbles">
+      <div class="pb"><div class="pb-val" style="color:var(--accent);">+$1.8k</div><div class="pb-lbl">30-DAY</div></div>
+      <div class="pb"><div class="pb-val" style="color:var(--accent2);">+$3.1k</div><div class="pb-lbl">60-DAY</div></div>
+      <div class="pb"><div class="pb-val" style="color:var(--accent2);">+$4.2k</div><div class="pb-lbl">90-DAY</div></div>
+    </div>
+  </div>
+  <div class="inbox-lbl">Detected from Inbox</div>
+  <div class="bill-card">
+    <div class="bc-ico" style="background:rgba(234,67,53,0.1);">📺</div>
+    <div class="bc-info">
+      <div class="bc-n">Netflix</div>
+      <div class="bc-m">Email confirmed · Due Oct 18</div>
+      <div class="bc-badge" style="background:rgba(255,82,82,0.1);color:var(--red);">⚡ Due in 3 days</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--red);">$15.99</div>
+      <div style="font-size:10px;color:var(--text3);">Monthly</div>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="ni"><div class="ni-ico">⊞</div><div class="ni-lbl">Home</div></div>
+    <div class="ni"><div class="ni-ico on">📊</div><div class="ni-lbl on">Flow</div></div>
+    <div class="ni"><div class="ni-ico">📅</div><div class="ni-lbl">Bills</div></div>
+    <div class="ni"><div class="ni-ico">👤</div><div class="ni-lbl">Profile</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S7: CAN I AFFORD IT
+════════════════════════════════ -->
+<div class="phone" id="s7">
+<div class="inner">
+  <div class="sb"><span class="t">9:45</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <span style="font-size:26px;">⚡</span>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--text);">CAN I AFFORD IT?</div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:18px;">Quick-check before you spend</div>
+    <div class="afford-lbl">What are you buying?</div>
+    <input class="afford-inp" value="New Mech Keyboard 🎹" readonly>
+    <div class="afford-lbl">How much?</div>
+    <div class="afford-amt">$250</div>
+    <div class="verdict">
+      <div class="v-word">YES ✓</div>
+      <div class="v-sub">
+        Spending <strong>$250 today</strong> leaves you <strong>$170</strong> for the week
+        and still covers your rent on the 1st
+      </div>
+      <div class="impact-grid">
+        <div class="igc"><div class="igv">$170</div><div class="igl">Remaining STS</div></div>
+        <div class="igc"><div class="igv" style="font-size:16px;">✓ Safe</div><div class="igl">Bills Covered</div></div>
+        <div class="igc"><div class="igv" style="font-size:15px;">Oct 1</div><div class="igl">Next Concern</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S8: ALERTS
+════════════════════════════════ -->
+<div class="phone" id="s8">
+<div class="inner">
+  <div class="sb"><span class="t">9:46</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--text);margin-bottom:4px;">ALERTS</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:16px;font-weight:600;letter-spacing:.5px;">HIGH-SIGNAL · LOW-NOISE</div>
+    <div class="alert-card" style="border-color:rgba(255,82,82,0.2);background:rgba(255,82,82,0.02);">
+      <div class="al-ico" style="background:rgba(255,82,82,0.1);">📋</div>
+      <div class="al-body">
+        <div class="al-title">Bill due in 3 days</div>
+        <div class="al-desc">Comcast <strong>$89.00</strong> due Thursday. Pay from Checking (bal: $4,210)?</div>
+        <button class="al-btn" style="background:rgba(255,82,82,0.12);color:var(--red);">Pay Now →</button>
+        <div class="al-time">2 min ago</div>
+      </div>
+    </div>
+    <div class="alert-card" style="border-color:rgba(0,245,176,0.15);">
+      <div class="al-ico" style="background:rgba(0,245,176,0.1);">💵</div>
+      <div class="al-body">
+        <div class="al-title">Payroll received</div>
+        <div class="al-desc"><strong>$5,200</strong> from Acme Corp. Safe to Spend now <strong style="color:var(--accent);">$1,840</strong></div>
+        <div class="al-time">Today 9:02 AM</div>
+      </div>
+    </div>
+    <div class="alert-card" style="border-color:rgba(255,179,71,0.15);">
+      <div class="al-ico" style="background:rgba(255,179,71,0.1);">⚠️</div>
+      <div class="al-body">
+        <div class="al-title">Unusual spend detected</div>
+        <div class="al-desc">Spent <strong>$340 on dining</strong> this week — <strong style="color:var(--warn);">2× your average</strong></div>
+        <div class="al-time">Yesterday</div>
+      </div>
+    </div>
+    <div class="alert-card" style="border-color:rgba(91,141,255,0.15);">
+      <div class="al-ico" style="background:rgba(91,141,255,0.1);">💎</div>
+      <div class="al-body">
+        <div class="al-title">Savings opportunity</div>
+        <div class="al-desc"><strong>$600 above</strong> your 30-day buffer sitting idle. Move to HYSA (4.8%)?</div>
+        <button class="al-btn" style="background:rgba(91,141,255,0.12);color:var(--accent2);">Move $600 →</button>
+        <div class="al-time">Yesterday</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="ni"><div class="ni-ico">⊞</div><div class="ni-lbl">Home</div></div>
+    <div class="ni"><div class="ni-ico">📊</div><div class="ni-lbl">Flow</div></div>
+    <div class="ni"><div class="ni-ico on">🔔</div><div class="ni-lbl on">Alerts</div></div>
+    <div class="ni"><div class="ni-ico">👤</div><div class="ni-lbl">Profile</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S9: SUBSCRIPTION AUDIT (NEW ZING)
+════════════════════════════════ -->
+<div class="phone" id="s9">
+<div class="inner">
+  <div class="sb"><span class="t">9:47</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--text);margin-bottom:14px;">SUBSCRIPTION<br>AUDIT</div>
+    <div class="sub-total-card">
+      <div class="sub-total-lbl">YOU'RE SPENDING</div>
+      <div class="sub-total-val">$127/mo</div>
+      <div class="sub-total-yr">$1,524 / year on subscriptions</div>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <div style="flex:1;padding:8px;background:rgba(255,82,82,0.08);border-radius:8px;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:#ff8a8a;">7</div>
+          <div style="font-size:9px;color:rgba(255,82,82,0.5);font-weight:700;">ACTIVE</div>
+        </div>
+        <div style="flex:1;padding:8px;background:rgba(255,82,82,0.08);border-radius:8px;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:#ff8a8a;">$42</div>
+          <div style="font-size:9px;color:rgba(255,82,82,0.5);font-weight:700;">WASTED/MO</div>
+        </div>
+        <div style="flex:1;padding:8px;background:rgba(0,245,176,0.08);border-radius:8px;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);">$504</div>
+          <div style="font-size:9px;color:rgba(0,245,176,0.4);font-weight:700;">SAVE/YR</div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-row">
+      <div class="sr-ico" style="background:rgba(229,9,20,0.12);">📺</div>
+      <div class="sr-info"><div class="sr-n">Netflix</div><div class="sr-m">Last watched 47 days ago</div></div>
+      <div class="sr-amt">$15.99</div>
+      <button class="sr-cancel">Cancel</button>
+    </div>
+    <div class="sub-row">
+      <div class="sr-ico" style="background:rgba(30,215,96,0.1);">🎵</div>
+      <div class="sr-info"><div class="sr-n">Spotify</div><div class="sr-m">Used daily ✓</div></div>
+      <div class="sr-amt">$10.99</div>
+      <button class="sr-keep">Keep</button>
+    </div>
+    <div class="sub-row">
+      <div class="sr-ico" style="background:rgba(0,100,255,0.1);">💪</div>
+      <div class="sr-info"><div class="sr-n">Planet Fitness</div><div class="sr-m">0 check-ins last month</div></div>
+      <div class="sr-amt">$24.99</div>
+      <button class="sr-cancel">Cancel</button>
+    </div>
+    <div class="sub-row" style="border:none;">
+      <div class="sr-ico" style="background:rgba(255,153,0,0.1);">📦</div>
+      <div class="sr-info"><div class="sr-n">Amazon Prime</div><div class="sr-m">Renews in 12 days</div></div>
+      <div class="sr-amt">$14.99</div>
+      <button class="sr-keep">Keep</button>
+    </div>
+    <button class="cancel-all-btn">Cancel 2 · Save $504/year →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S10: TRIP MODE (NEW ZING)
+════════════════════════════════ -->
+<div class="phone" id="s10">
+<div class="inner">
+  <div class="sb"><span class="t">9:48</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--text);margin-bottom:12px;">TRIP MODE 🗺️</div>
+    <div class="trip-hero">
+      <div class="trip-badge">✈️ FLIGHT DETECTED FROM EMAIL</div>
+      <div class="trip-title">NYC → San Francisco</div>
+      <div class="trip-dates">Oct 24 – Oct 28 · 4 nights · 2 people</div>
+      <div class="trip-budget-row">
+        <div>
+          <div class="trip-budget-lbl">SPENT SO FAR</div>
+          <div class="trip-spent">$840</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="trip-budget-lbl">BUDGET</div>
+          <div class="trip-limit">$1,800</div>
+        </div>
+      </div>
+      <div class="trip-progress"><div class="trip-fill" style="width:46%;"></div></div>
+      <div style="font-size:10px;color:var(--text3);margin-top:5px;">$960 remaining · <span style="color:var(--accent);">On track ✓</span></div>
+    </div>
+    <div class="trip-cats">
+      <div class="tc">
+        <div class="tc-ico">✈️</div>
+        <div class="tc-lbl">FLIGHTS</div>
+        <div class="tc-val">$420</div>
+        <div class="tc-bar"><div class="tc-fill" style="width:70%;background:var(--accent2);"></div></div>
+      </div>
+      <div class="tc">
+        <div class="tc-ico">🏨</div>
+        <div class="tc-lbl">HOTEL</div>
+        <div class="tc-val">$280</div>
+        <div class="tc-bar"><div class="tc-fill" style="width:45%;background:var(--purple);"></div></div>
+      </div>
+      <div class="tc">
+        <div class="tc-ico">🍽️</div>
+        <div class="tc-lbl">FOOD (EST)</div>
+        <div class="tc-val">$320</div>
+        <div class="tc-bar"><div class="tc-fill" style="width:35%;background:var(--warn);"></div></div>
+      </div>
+      <div class="tc">
+        <div class="tc-ico">🚗</div>
+        <div class="tc-lbl">TRANSPORT</div>
+        <div class="tc-val">$140</div>
+        <div class="tc-bar"><div class="tc-fill" style="width:25%;background:var(--accent);"></div></div>
+      </div>
+    </div>
+    <div class="itinerary">
+      <div class="sec-lbl" style="margin-bottom:8px;">UPCOMING</div>
+      <div class="it-row">
+        <div class="it-time">Oct 24</div>
+        <div class="it-event">✈️ Depart JFK → SFO</div>
+        <div class="it-amt">$420</div>
+      </div>
+      <div class="it-row">
+        <div class="it-time">Oct 24</div>
+        <div class="it-event">🏨 Hotel Zephyr check-in</div>
+        <div class="it-amt">$280</div>
+      </div>
+      <div class="it-row" style="border:none;">
+        <div class="it-time">Oct 28</div>
+        <div class="it-event">✈️ Return SFO → JFK</div>
+        <div class="it-amt" style="color:var(--accent);">Covered</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     S11: PREMIUM
+════════════════════════════════ -->
+<div class="phone" id="s11">
+<div class="inner">
+  <div class="sb"><span class="t">9:49</span><div class="sb-r">●●● 🔋</div></div>
+  <div class="content">
+    <div class="prem-badge">⭐ UPGRADE TO PREMIUM</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--text);line-height:1.1;margin-bottom:6px;">UNLOCK YOUR<br>FINANCIAL POWER</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">You've hit the 3-account limit</div>
+    <div class="plan">
+      <div class="plan-name">Basic</div>
+      <div class="plan-price" style="color:var(--text3);">Free</div>
+      <div class="plan-feats">
+        <div class="pf"><span class="pf-check">✓</span> 3 linked accounts</div>
+        <div class="pf"><span class="pf-check">✓</span> 90-day history</div>
+        <div class="pf"><span class="pf-x">✕</span> <span style="opacity:.4;">Email intelligence</span></div>
+        <div class="pf"><span class="pf-x">✕</span> <span style="opacity:.4;">Safe to Spend · AI prompts</span></div>
+        <div class="pf"><span class="pf-x">✕</span> <span style="opacity:.4;">Trip Mode · Sub Audit</span></div>
+      </div>
+    </div>
+    <div class="plan feat">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="plan-name">Premium ⚡</div>
+        <div style="padding:3px 8px;background:linear-gradient(135deg,var(--gold),var(--warn));border-radius:6px;font-size:10px;font-weight:800;color:#1a0a00;">POPULAR</div>
+      </div>
+      <div class="plan-price">$9.99<span>/mo</span></div>
+      <div class="plan-feats">
+        <div class="pf"><span class="pf-check">✓</span> Unlimited accounts + full history</div>
+        <div class="pf"><span class="pf-check">✓</span> Email intelligence (bills, receipts)</div>
+        <div class="pf"><span class="pf-check">✓</span> AI prompts + Safe to Spend</div>
+        <div class="pf"><span class="pf-check">✓</span> Subscription Audit + Trip Mode</div>
+        <div class="pf"><span class="pf-check">✓</span> Investment tracking + insights</div>
+      </div>
+      <button class="up-btn">Start 14-Day Free Trial →</button>
+    </div>
+    <div class="savings-pill">Cancel anytime · No card required · <em>Save 33% annually</em></div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

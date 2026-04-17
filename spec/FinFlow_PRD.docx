@@ -1,0 +1,611 @@
+FinFlow — Personal Finance Management App	Product Requirements Document  |  v1.0
+
+**FinFlow**
+
+Personal Finance Management App
+
+Product Requirements Document  |  Version 1.0
+
+Status: Draft for Review
+
+Last Updated: April 2026
+
+# **Table of Contents**
+
+# **1. Executive Summary**
+
+FinFlow is an AI-powered personal finance management application that provides users with a unified, intelligent view of their complete financial life. By deeply integrating with banks, credit cards, loans, investments, and other financial instruments — and uniquely combining that data with email intelligence — FinFlow moves beyond passive reporting to become a proactive financial advisor in users' pockets.
+
+The core differentiator is FinFlow's ability to correlate structured financial data with unstructured signals from email: detecting upcoming bills, subscriptions, purchase receipts, tax documents, insurance renewals, and travel bookings. Combined with AI-driven cashflow modeling, FinFlow prompts users with real-time guidance on what they can afford to spend, what expenses are coming, and how to optimize their financial decisions.
+
+| **Mission** | To give every person clear, proactive, and personalized financial intelligence — so they always know where they stand, what's coming, and what to do next. |
+| --- | --- |
+
+| **Attribute** | **Value** |
+| --- | --- |
+| Product Name | FinFlow |
+| Version | 1.0 (MVP) |
+| Target Platform | iOS, Android, Web |
+| Primary Audience | Individuals & households aged 22–55 |
+| Target Launch | Q4 2026 |
+| Document Owner | Product Team |
+
+# **2. Goals ****&**** Success Metrics**
+
+## **2.1 Business Goals**
+
+- Achieve 250,000 monthly active users (MAU) within 12 months of launch
+
+- Attain a Day-30 retention rate of 45%+ through proactive, high-value prompts
+
+- Generate revenue via freemium subscription (Basic free, Premium at $9.99/month)
+
+- Establish data partnerships with major financial institutions for deeper integration
+
+- Build trust through best-in-class data security and privacy practices
+
+## **2.2 User Goals**
+
+- Understand their complete financial picture in one place, at a glance
+
+- Know exactly how much discretionary money they have available right now
+
+- Never be surprised by a forgotten bill, subscription renewal, or large upcoming expense
+
+- Receive actionable, personalized guidance rather than raw data dumps
+
+- Feel in control of their money without spending hours on manual tracking
+
+## **2.3 Key Success Metrics (KPIs)**
+
+| **Metric** | **Definition** | **Target (12-month)** |
+| --- | --- | --- |
+| MAU | Users active at least once in 30 days | 250,000 |
+| D30 Retention | Users returning at Day 30 | 45% |
+| Connected Accounts / User | Avg. financial accounts linked | >3.5 |
+| Email Integration Rate | % of users who connect email | 60% |
+| Prompt Engagement Rate | % of prompts acted upon by user | >35% |
+| Premium Conversion | Free-to-paid conversion rate | 12% |
+| NPS | Net Promoter Score | >50 |
+| App Store Rating | Average star rating | 4.5+ |
+
+# **3. Target Users ****&**** Personas**
+
+## **3.1 Primary Personas**
+
+### **Persona 1 — The Busy Professional (****"****Maya****"****)**
+
+- Age 32, software engineer, earns $140K/year
+
+- Has checking, savings, 2 credit cards, 401(k), and a student loan
+
+- Pain: Loses track of subscriptions, overspends on dining, misses investment rebalancing cues
+
+- Goal: Wants a single app that tells her what she can spend on dinner tonight without guilt
+
+### **Persona 2 — The Young Family (****"****David ****&**** Priya****"****)**
+
+- Ages 35/33, combined income $185K, two kids, mortgage, car loan, college savings
+
+- Pain: Variable monthly expenses make budgeting hard; surprise expenses derail savings
+
+- Goal: Shared financial visibility with smart alerts before expenses hit
+
+### **Persona 3 — The Near-Retiree (****"****Robert****"****)**
+
+- Age 58, managing multiple investment accounts, pension, rental income, insurance
+
+- Pain: Hard to track withdrawal strategies, required minimum distributions, portfolio drift
+
+- Goal: Clean cash flow picture that factors in all income and investment activity
+
+## **3.2 Out-of-Scope Users (v1.0)**
+
+- Small businesses or freelancers with complex business accounting needs
+
+- Users in countries without supported bank aggregator coverage
+
+- Minors under 18
+
+# **4. Integrations ****&**** Data Sources**
+
+## **4.1 Financial Account Integrations**
+
+FinFlow connects to financial institutions via certified open-banking aggregators (Plaid, MX, Finicity) as primary providers, with direct bank API partnerships as a secondary layer for major institutions.
+
+### **4.1.1 Banking**
+
+- Checking accounts: real-time balance, transaction history, pending transactions
+
+- Savings accounts: balance, interest earned, scheduled transfers
+
+- Money market accounts: balance and yield data
+
+- Supported institutions: 12,000+ banks and credit unions via aggregators
+
+- Refresh cadence: real-time webhooks where available, polling every 4 hours as fallback
+
+### **4.1.2 Credit Cards**
+
+- Current balance, available credit, and credit utilization
+
+- Statement balance, minimum payment, and due date (critical for prompt engine)
+
+- Full itemized transaction feed with merchant name, category, and amount
+
+- Rewards points / cashback balance tracking
+
+- Interest rate (APR) for debt payoff modeling
+
+### **4.1.3 Loans**
+
+- Mortgage: outstanding balance, monthly payment, escrow details, next due date
+
+- Auto loans: balance, monthly payment, payoff date
+
+- Student loans: federal and private; servicer integration; income-driven repayment tracking
+
+- Personal loans: balance, rate, and payment schedule
+
+- HELOC: credit line, balance, draw period status
+
+### **4.1.4 Investments**
+
+- Brokerage accounts: holdings, performance, realized/unrealized gains
+
+- Retirement accounts: 401(k), IRA, Roth IRA — balance, contribution YTD, employer match tracking
+
+- 529 college savings plans
+
+- Crypto wallets: read-only balance tracking (Coinbase, Kraken, Ledger via APIs)
+
+- Real estate: Zestimate / manual entry for net worth calculation
+
+- Market data: EOD pricing via integrated market data provider
+
+### **4.1.5 Other Financial Instruments**
+
+- Insurance policies: premium amounts and due dates (home, auto, life, health)
+
+- Utility accounts: bill amounts and due dates where APIs are available
+
+- PayPal / Venmo / Cash App: balance and transaction history
+
+- HSA / FSA accounts: balance, eligible expenses, rollover deadlines
+
+## **4.2 Email Integration**
+
+Email integration is a core and differentiating feature of FinFlow. With explicit user consent, FinFlow connects to Gmail and Outlook (OAuth 2.0) and scans email for financial signals.
+
+Privacy guarantee: FinFlow does not read, store, or transmit the content of personal email. It uses on-device NLP pattern matching and server-side processing only on emails matching financial filters. Users may revoke access at any time.
+
+| **Email Signal Type** | **What FinFlow Extracts** |
+| --- | --- |
+| Purchase receipts / order confirmations | Merchant, amount, date — cross-referenced with card transactions |
+| Subscription billing notices | Service name, amount, billing date — added to upcoming expenses |
+| Utility & service bills | Provider, amount due, due date |
+| Loan & credit card statements | Due date, minimum payment, full balance |
+| Insurance renewal notices | Provider, premium, renewal date |
+| Travel itineraries (flights, hotels) | Trip dates, estimated costs, booking confirmations |
+| Tax documents (W-2, 1099, refund notices) | Document type, issuer — alerts user to review |
+| Bank fraud alerts / balance notifications | Alert type — surfaced in FinFlow notification center |
+| Salary / payroll deposit notifications | Expected pay date, estimated amount |
+
+# **5. Feature Requirements**
+
+## **5.1 Unified Financial Dashboard**
+
+The Dashboard is the home screen — a real-time snapshot of the user's complete financial health.
+
+### **5.1.1 Net Worth Module**
+
+- Displays total assets minus total liabilities, updated daily
+
+- Assets: cash + investments + real estate + other assets
+
+- Liabilities: credit card balances + loans + HELOC
+
+- Trend sparkline: 30-day, 90-day, 1-year net worth trajectory
+
+- Drill-down by asset class or liability type
+
+### **5.1.2 Account Summary Cards**
+
+- Individual card per linked account showing current balance and last-updated timestamp
+
+- Color-coded status: green (positive), amber (approaching limit or low balance), red (overdue)
+
+- Tap to drill into full transaction history for that account
+
+- Sorting: by type, by balance, by last activity
+
+## **5.2 Income ****&**** Spend Identification and Categorization**
+
+### **5.2.1 Transaction Ingestion**
+
+- All transactions across connected accounts ingested in near-real-time
+
+- Merchant name normalization ("SQ *BLUE BOTTLE" becomes "Blue Bottle Coffee")
+
+- Duplicate detection across accounts (e.g., debit card charge + bank debit for same purchase)
+
+- Manual transaction entry for cash purchases
+
+### **5.2.2 Automatic Categorization**
+
+- ML-based classifier trained on 50M+ anonymized financial transactions
+
+- Primary categories: Income, Housing, Food & Dining, Transportation, Healthcare, Entertainment, Shopping, Travel, Personal Care, Education, Giving, Taxes, Savings & Investments, Transfers
+
+- Sub-categories (e.g., Food & Dining > Restaurants, Groceries, Coffee Shops, Delivery)
+
+- Confidence score per categorization; low-confidence items flagged for user review
+
+- User can override any categorization; corrections feed back to personalize the model
+
+- Split transactions: user can allocate one transaction across multiple categories
+
+- Recurring transaction detection: identifies and labels repeating charges (subscriptions, rent, payroll)
+
+### **5.2.3 Income Detection**
+
+- Distinguishes between active income (payroll, freelance), passive income (dividends, rental), and transfers
+
+- Payroll deposits: links to email pay stubs when available for gross pay, deductions, and net pay
+
+- Variable income smoothing: for freelancers, calculates 3-month trailing average
+
+- Expected vs. actual income alerts: notifies user if expected paycheck is late or differs from expected amount
+
+## **5.3 Cash Flow Analysis**
+
+### **5.3.1 Cash Flow Dashboard**
+
+- Monthly in/out bar chart: income vs. total spend with net surplus/deficit
+
+- Weekly and daily granularity views
+
+- Rolling 30-day cash position across all liquid accounts
+
+- Fixed vs. variable expense breakdown
+
+- Year-over-year and month-over-month comparisons
+
+### **5.3.2 Projected Cash Flow**
+
+- Forward-looking 30/60/90-day cashflow projection
+
+- Incorporates: known recurring income (payroll, rent received), confirmed upcoming bills (from email + statement data), estimated recurring variable spend (based on past 3 months average), and scheduled loan/credit card payments
+
+- Confidence band shown on projection (tight for well-established users, wider for new users)
+
+- User can manually add expected income or expense to refine the projection
+
+## **5.4 Allowable Expense Prompting**
+
+This is a key differentiating feature. Rather than simply showing historical data, FinFlow tells users what they can safely spend right now.
+
+### **5.4.1 Spend Budget Prompt**
+
+- Based on current liquid balance, confirmed upcoming fixed expenses (next 30 days), projected variable needs (food, transport), and user-defined savings goal contribution — FinFlow calculates a real-time "Safe to Spend" amount
+
+- Safe to Spend is displayed prominently on the dashboard and updated in real-time as transactions occur
+
+- Breakdown: Total liquid balance minus upcoming committed expenses minus savings buffer equals discretionary available
+
+- Category-level prompts: "You have $180 left for dining this month" based on user's target or historical pattern
+
+### **5.4.2 In-the-Moment Spend Check**
+
+- User can ask "Can I afford [amount]?" via a quick-check widget
+
+- FinFlow responds with yes/no and impact: "Yes — spending $200 today reduces your safe-to-spend to $320 and still covers all bills through the 30th"
+
+- Optional: Apple Watch / widget integration for glanceable Safe to Spend balance
+
+### **5.4.3 Spend Goal Guardrails**
+
+- Users set optional monthly targets per category
+
+- FinFlow warns at 75% and 90% of each target
+
+- Post-month summary: actual vs. target per category with trend
+
+## **5.5 Upcoming Expense Intelligence**
+
+This module combines email signals, past transaction patterns, and calendar awareness to surface upcoming expenses the user may not be actively tracking.
+
+### **5.5.1 Known Upcoming Bills (Email-Sourced)**
+
+- FinFlow scans email for bill notices, subscription renewals, and due date reminders
+
+- Surfaces these as structured upcoming expense cards: merchant, amount, due date, and payment method
+
+- Allows user to confirm, edit amount (if variable), or mark as "already handled"
+
+- Subscription audit: lists all detected subscriptions with amounts; allows user to flag any for cancellation review
+
+### **5.5.2 Predicted Upcoming Expenses (Pattern-Based)**
+
+- Recurring charge detection: if the same merchant has charged monthly for 3+ months, FinFlow schedules a predicted future charge
+
+- Annual charges predicted: insurance premiums, Amazon Prime, domain renewals, etc. predicted 30 days in advance based on prior-year transaction
+
+- Seasonal spend alerts: "Based on last year, you typically spend $600+ on gifts in December. You're currently on track to exceed that."
+
+- Car registration, tax season, back-to-school — calendar-triggered contextual prompts based on historical behavior
+
+### **5.5.3 Travel ****&**** Event Expense Planning**
+
+- Email-detected travel bookings (flights, hotels, car rentals) are added to upcoming expenses
+
+- FinFlow estimates ancillary travel spend (meals, transport, activities) based on destination and trip length, using historical travel spend patterns
+
+- Creates a temporary "trip budget" card with running spend vs. estimate during travel dates
+
+### **5.5.4 Upcoming Expense Timeline View**
+
+- Calendar / timeline view showing all upcoming expenses for the next 90 days
+
+- Color-coded by confidence: confirmed (from statement/email), predicted high confidence, predicted low confidence
+
+- Stacked view showing impact on projected cash position
+
+## **5.6 Notifications ****&**** Proactive Prompts**
+
+FinFlow's notification system is designed to be high-signal and low-noise. Users control frequency and channels.
+
+### **Prompt Types**
+
+- Bill due in 3 days — "Your Comcast bill of $89 is due Thursday. Pay from Checking (balance: $2,140)?"
+
+- Low balance warning — "Your checking balance drops below $500 on Oct 18 based on scheduled payments."
+
+- Unusual spend — "You've spent $340 on dining this week, 2x your typical weekly average."
+
+- Subscription detected — "We found a new $14.99/month charge to Paramount+. Add to your expense tracker?"
+
+- Income received — "$5,200 payroll deposit from Acme Corp received. Your Safe to Spend is now $1,840."
+
+- Savings opportunity — "You have $600 above your 30-day expense buffer. Consider moving it to your high-yield savings."
+
+- Annual expense approaching — "Your car insurance renewed last October for $1,240. It's likely due in 3 weeks."
+
+# **6. Non-Functional Requirements**
+
+## **6.1 Security ****&**** Privacy**
+
+- Bank-grade 256-bit AES encryption at rest; TLS 1.3 in transit
+
+- No storage of banking credentials — OAuth tokens only, managed via aggregator
+
+- Email: OAuth 2.0 access with read-only scopes; no email content stored on servers beyond extracted financial metadata
+
+- SOC 2 Type II compliance required at launch
+
+- GDPR and CCPA compliant: full data export and deletion on request within 30 days
+
+- Biometric authentication (Face ID / fingerprint) required for app access
+
+- Session timeout after 10 minutes of inactivity; configurable
+
+- Fraud detection on login: anomalous IP/device triggers step-up authentication
+
+- Penetration testing quarterly; third-party security audit annually
+
+## **6.2 Performance**
+
+- App cold start: under 2 seconds on supported devices
+
+- Dashboard load (cached data): under 500ms
+
+- Account refresh (full sync): under 30 seconds for typical user (< 10 accounts)
+
+- Email scan: background process, complete within 5 minutes of email connection or new email arrival
+
+- Notification delivery latency: under 60 seconds from trigger event
+
+- API uptime SLA: 99.9% (< 8.7 hours downtime per year)
+
+## **6.3 Scalability**
+
+- Architecture: cloud-native, microservices on AWS (primary) with multi-region active-passive failover
+
+- Horizontal auto-scaling for data ingestion and categorization workers
+
+- Support 5M users without architecture re-design
+
+- Database: sharded PostgreSQL with read replicas for transaction history; Redis for real-time balance caching
+
+## **6.4 Accessibility**
+
+- WCAG 2.1 AA compliance on web and mobile
+
+- Dynamic type support (iOS) and font scaling (Android)
+
+- Screen reader compatible (VoiceOver / TalkBack) for all core flows
+
+- Color-blind accessible palette — no information conveyed by color alone
+
+# **7. User Experience Principles**
+
+- Clarity over completeness: Show the user what they need to act on, not everything we know
+
+- Proactive, not reactive: FinFlow should tell users things before they think to ask
+
+- Earn trust incrementally: Show value immediately; ask for more permissions only when the payoff is clear
+
+- Reduce cognitive load: Complex financial data surfaced as simple, human answers ("You can spend $120 on dinner")
+
+- Respect attention: Maximum 2 push notifications per day unless user opts for more; smart suppression during do-not-disturb hours
+
+- Graceful degradation: If an account connection fails, make it clearly visible but don't break the rest of the experience
+
+## **7.1 Onboarding Flow**
+
+- Welcome & value proposition (30-second explainer)
+
+- Account creation: email + password + biometric enrollment
+
+- Connect first financial account (bank checking recommended)
+
+- First value moment: dashboard loads with real balance and recent transactions
+
+- Permission prompt: "Connect email to unlock upcoming expense detection"
+
+- Connect additional accounts (skippable; resurface later)
+
+- Personalization: set monthly savings goal and 1–2 spending priorities
+
+# **8. Technical Architecture Overview**
+
+## **8.1 System Components**
+
+| **Component** | **Description** |
+| --- | --- |
+| Mobile Apps (iOS / Android) | React Native with native modules for biometrics and background sync |
+| Web App | React + TypeScript, server-side rendered for performance |
+| API Gateway | GraphQL gateway with REST fallback; rate-limited per user |
+| Auth Service | OAuth 2.0 / OIDC with JWT; MFA support |
+| Account Aggregation Service | Plaid / MX integration layer; manages token refresh and webhook ingestion |
+| Email Integration Service | Gmail & Outlook OAuth; on-device NLP pre-filter + server NLP extraction pipeline |
+| Transaction Processor | Ingestion → deduplication → normalization → ML categorization pipeline |
+| Cashflow Engine | Projection model combining actuals, scheduled, and predicted transactions |
+| Prompt Engine | Rule + ML hybrid; generates ranked prompts per user; manages delivery channel and timing |
+| Notification Service | FCM (Android), APNs (iOS), email; deduplication and throttling |
+| Data Store | PostgreSQL (primary), Redis (cache), S3 (raw event archive) |
+| ML Platform | SageMaker for model training and serving; A/B testing infrastructure |
+
+## **8.2 Third-Party Dependencies**
+
+| **Provider** | **Purpose** |
+| --- | --- |
+| Plaid / MX / Finicity | Bank, credit, and investment account aggregation |
+| Google OAuth & Microsoft OAuth | Email integration (Gmail, Outlook) |
+| AWS (primary cloud) | Compute, storage, ML, CDN |
+| Segment | User analytics and event tracking |
+| SendGrid | Transactional and notification emails |
+| Sentry | Error monitoring and alerting |
+| Stripe | Premium subscription billing |
+| Braze | Push notification orchestration |
+
+# **9. Monetization Model**
+
+| **Tier** | **Details** |
+| --- | --- |
+| Basic (Free) | Up to 3 linked accounts, 90-day transaction history, manual categorization, basic cash flow, no email integration |
+| Premium ($9.99/month or $79.99/year) | Unlimited accounts, full history, email integration, AI prompts, upcoming expense intelligence, safe-to-spend, investment tracking, priority support |
+| Family Plan ($14.99/month) | Up to 5 users on Premium, shared dashboard option for household view |
+
+Future revenue streams (v2+): white-label for financial institutions, referral commissions for high-yield savings / refinancing offers (disclosed and opt-in only), premium financial advisor connection marketplace.
+
+# **10. Roadmap ****&**** Phasing**
+
+## **Phase 1 — MVP (Q2–Q3 2026)**
+
+- Bank, credit card, and investment account aggregation via Plaid
+
+- Transaction ingestion, normalization, and ML categorization
+
+- Dashboard: net worth, account cards, income vs. spend
+
+- Email integration (Gmail first, Outlook in Phase 1b)
+
+- Upcoming expenses detection from email
+
+- Basic cash flow projection (30-day)
+
+- Safe to Spend calculation and display
+
+- Core notification types (bill due, unusual spend, income received)
+
+- iOS and Android app + web
+
+## **Phase 2 — Growth (Q4 2026 – Q1 2027)**
+
+- Loan integration (mortgage, auto, student)
+
+- Pattern-based predicted upcoming expense engine
+
+- Travel & event expense planning (email-sourced itineraries)
+
+- Category spend guardrails and goals
+
+- Investment performance module
+
+- Apple Watch / widget for Safe to Spend
+
+- Family plan
+
+## **Phase 3 — Depth (Q2 2027+)**
+
+- Cryptocurrency wallet integration
+
+- Tax preparation data export (categorized transactions, 1099 detection)
+
+- Debt payoff optimizer (avalanche / snowball modeling)
+
+- In-app financial advisor marketplace
+
+- Savings automation rules ("round up", "sweep excess to savings")
+
+- Open banking API for third-party integrations
+
+# **11. Risks ****&**** Mitigations**
+
+| **Risk** | **Impact** | **Mitigation** |
+| --- | --- | --- |
+| Aggregator API instability or data gaps | Users lose account visibility; trust erodes | Multi-aggregator strategy (Plaid + MX fallback); real-time status page; user-facing error messaging |
+| Email permission friction | Low email integration adoption | Strong value-before-ask onboarding; clear, granular privacy controls; visible benefits before prompt |
+| ML categorization errors at scale | User frustration; manual correction burden | Confidence thresholds with human review prompts; rapid feedback loop; continuous model retraining |
+| Regulatory changes (open banking, data privacy) | Compliance cost or feature rollback required | Legal review at every major feature; modular architecture for regional compliance variants |
+| Security breach | Catastrophic trust and reputational damage | Zero-credential storage architecture; bug bounty program; annual pen testing; incident response plan |
+| Notification fatigue | Users disable notifications; core loop breaks | Strict daily caps; relevance scoring; A/B testing of timing and copy; easy granular controls |
+| Competitive response from incumbents (Mint, YNAB, Copilot) | User acquisition difficulty | Differentiate on email intelligence and proactive prompting; faster iteration cycle |
+
+# **12. Open Questions**
+
+- Which bank aggregator should be the primary provider for MVP — Plaid, MX, or Finicity? Evaluate coverage, pricing, and webhook reliability.
+
+- Should the Safe to Spend model exclude or include credit card available balance? (Risk of encouraging debt spending.)
+
+- What is the minimum viable email integration — full Gmail scan or opt-in per sender/domain?
+
+- Should FinFlow support manual account entry for institutions not covered by aggregators? If so, how do we ensure data quality?
+
+- Legal review needed: Does email transaction matching create any CFPB data aggregator compliance obligations?
+
+- What is the right default notification frequency? Propose A/B test design.
+
+- Should investment performance views be gated behind Premium, or does showing partial data in Free create sufficient upgrade incentive?
+
+# **13. Appendix**
+
+## **13.1 Glossary**
+
+| **Term** | **Definition** |
+| --- | --- |
+| Safe to Spend | Discretionary amount available after subtracting upcoming fixed expenses and savings buffer from liquid balance |
+| Cashflow Projection | Forward-looking estimate of net cash position incorporating income, fixed, and predicted variable expenses |
+| Recurring Charge Detection | ML identification of transactions repeating at regular intervals from the same merchant |
+| Email Intelligence | NLP-based extraction of financial signals (bills, receipts, bookings) from connected email accounts |
+| MQL / SQL | Not applicable in this context — internal abbreviations for financial categories |
+| Aggregator | Third-party service (Plaid, MX) that connects FinFlow to financial institutions via their APIs |
+| Prompt | A proactive, actionable notification generated by FinFlow's prompt engine based on user financial data |
+| Confidence Band | Uncertainty range shown on cashflow projections, widening as prediction horizon increases |
+
+## **13.2 Related Documents**
+
+- FinFlow Design System & Component Library (Figma — link TBD)
+
+- FinFlow Data Model & Entity Relationship Diagram (Confluence — link TBD)
+
+- FinFlow Security Architecture Document (Internal — restricted)
+
+- Email Integration Privacy Impact Assessment (Legal — Q2 2026)
+
+- ML Categorization Model Card (Data Science — link TBD)
+
+*Document version 1.0 — For internal review only. Not for external distribution.*
+
+Confidential  |  Page  of
