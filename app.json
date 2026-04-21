@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "FinFlow",
+    "slug": "finflow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#060810",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#060810"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.finflow.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "FinFlow uses Face ID to securely authenticate you — no password required.",
+        "NSCameraUsageDescription": "FinFlow uses the camera for Face ID setup.",
+        "NSPhotoLibraryUsageDescription": "FinFlow may access your photo library for profile photos."
+      },
+      "entitlements": {
+        "com.apple.developer.associated-domains": ["applinks:finflow.app"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#060810"
+      },
+      "package": "com.finflow.app",
+      "versionCode": 1,
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "INTERNET",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID to authenticate."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#060810",
+          "image": "./assets/splash.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "scheme": "finflow",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "finflow-app-projectid"
+      }
+    }
+  }
+}

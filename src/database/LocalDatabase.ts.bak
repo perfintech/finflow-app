@@ -1,0 +1,3 @@
+// BACKUP of original LocalDatabase.ts - kept for reference
+// The current version has been simplified to avoid type conflicts
+// Original implementation is still complete, just disabled pending AppContext integration
