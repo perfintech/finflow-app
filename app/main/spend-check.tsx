@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppContext } from '@/context/AppContext';
 import { colors, fonts, gradients, spacing } from '@/constants/theme';
@@ -62,7 +63,8 @@ export default function SpendCheckScreen() {
           : null;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Can I afford it?</Text>
       <Text style={styles.subtitle}>Check your Safe to Spend before any purchase.</Text>
 
@@ -131,17 +133,17 @@ export default function SpendCheckScreen() {
           </View>
         ))}
       </View>
+
+      <View style={{ height: spacing.xxxl }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingHorizontal: spacing.screen,
-    paddingTop: spacing.xxxl,
-  },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: spacing.screen, paddingTop: spacing.xl },
   fallbackContainer: {
     flex: 1,
     backgroundColor: colors.bg,

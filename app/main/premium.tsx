@@ -1,4 +1,5 @@
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppContext } from '@/context/AppContext';
 import { colors, fonts, gradients, spacing } from '@/constants/theme';
@@ -52,7 +53,8 @@ export default function PremiumScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Upgrade to Premium</Text>
       <Text style={styles.subtitle}>Unlock the full power of FinFlow.</Text>
 
@@ -165,17 +167,17 @@ export default function PremiumScreen() {
           <Text style={styles.faqAnswer}>Yes, 30 days free to explore all Premium features.</Text>
         </View>
       </View>
+
+      <View style={{ height: spacing.xxxl }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingHorizontal: spacing.screen,
-    paddingTop: spacing.xxxl,
-  },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: spacing.screen, paddingTop: spacing.xl },
   title: {
     color: colors.text,
     fontFamily: fonts.outfitBold,

@@ -1,6 +1,6 @@
 # FinFlow — Architecture Document
 
-> Version 1.0 · April 2026 · Client-Side (Tier 1) Implementation
+> Version 1.1 · April 2026 · Client-Side (Tier 1) Implementation
 
 ---
 
@@ -58,14 +58,17 @@ AppNavigator (root)
 ├── OnboardingStack (shown if !isOnboarded)
 │   ├── SplashScreen
 │   ├── CreateAccountScreen
+│   ├── BiometricScreen          ← v1.1 added
 │   ├── LinkBankScreen
-│   └── EmailIntelligenceScreen
+│   └── EmailIntelligenceScreen  ← AHA moment sheet added
 │
 └── MainTabNavigator (shown if isOnboarded)
     ├── Tab: Dashboard
     │   └── DashboardScreen
     ├── Tab: Flow
     │   └── CashflowScreen
+    ├── Tab: Money Map            ← v1.1 NEW
+    │   └── MoneyMapScreen
     ├── Tab: Alerts
     │   └── AlertsScreen
     └── Tab: Profile
@@ -163,17 +166,32 @@ DashboardScreen
 └── BottomTabBar
 
 CashflowScreen
+├── PeriodToggle (Monthly | Weekly | Daily)
 ├── CashflowBarChart
+├── InboxDetectedBillCard[]
 ├── ProjectionChart
-├── ProjectionBubble[]
-└── BillCard[]
+└── ProjectionBubble[]
+
+MoneyMapScreen  ← v1.1 NEW
+├── TotalBalanceCard (cross-institution net)
+│   └── InstitutionRow[]  (per-bank balance)
+├── InflowSection
+│   └── InflowCard[]  (per-institution income this month)
+├── ExpenseBreakdownSection
+│   └── CategoryRow[]  (top categories with % bars)
+├── SavingsInvestmentSection
+│   └── AccountCard[]  (savings + investment accounts)
+└── BillsThisMonthSection
+    └── BillRow[]  (all bills due in current month)
 
 AlertsScreen
 └── AlertCard[]  (4 variants: danger, success, warning, info)
 
 SubscriptionAuditScreen
+├── YearlyStatsCard
 ├── SubTotalCard
-└── SubscriptionRow[]  (cancel/keep actions)
+├── SubscriptionRow[]  (cancel/keep actions, usage info)
+└── BulkCancelButton
 
 TripModeScreen
 ├── TripHeroCard (ProgressBar)
@@ -206,4 +224,58 @@ All screens are functional without network connectivity:
 
 ---
 
-*FinFlow Architecture v1.0 — Client Layer — April 2026*
+---
+
+## 8. Cross-Institution Financial Summary (v1.1)
+
+### Feature Overview
+
+The **Money Map** tab aggregates all account and transaction data across every linked institution to produce a unified, real-time financial picture. This replaces the need to log into multiple bank portals to understand where money sits, how it moves, and what's owed.
+
+### Five Dimensions
+
+| # | Dimension | Data Source | Grouping |
+|---|-----------|-------------|---------|
+| 1 | **Money Inflow** | `transactions.isDebit = false` (current month) | By institution |
+| 2 | **Spending on Expenses** | `transactions.isDebit = true` (current month) | By category |
+| 3 | **Savings & Investments** | `accounts.type IN (savings, investment)` | By account |
+| 4 | **Total Balance** | All `accounts.balanceCents` | By institution |
+| 5 | **Bills Due This Month** | `bills` where `dueDate` in current calendar month | By status |
+
+### Data Aggregation Logic
+
+```
+MoneyMapScreen.mount()
+        │
+        ▼
+profile.accounts → group by institution
+        │
+        ├── Per institution: sum(balanceCents) by type
+        │
+        ▼
+profile.transactions (current month)
+        │
+        ├── filter isDebit=false → inflow by institution
+        └── filter isDebit=true  → spend by category (top 6)
+        │
+        ▼
+profile.accounts
+        ├── type=savings     → savingsAccounts[]
+        └── type=investment  → investmentAccounts[]
+        │
+        ▼
+profile.bills
+        └── filter: dueDate month === current month → monthBills[]
+```
+
+### Cross-Institution Institution Card
+
+Each institution card shows:
+- Institution name + brand color
+- Net position (sum of all accounts at that bank)
+- Account breakdown: Checking, Savings, Credit (with individual balances)
+- Inflow this month from that institution
+
+---
+
+*FinFlow Architecture v1.1 — Client Layer — April 2026*

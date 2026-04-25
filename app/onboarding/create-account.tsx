@@ -19,7 +19,7 @@ export default function CreateAccountScreen() {
     setSubmitting(true);
     await createAccount(name.trim(), email.trim());
     setSubmitting(false);
-    router.push('/onboarding/link-bank');
+    router.push('/onboarding/biometric');
   };
 
   return (

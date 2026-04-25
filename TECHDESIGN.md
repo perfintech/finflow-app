@@ -1,6 +1,6 @@
 # FinFlow — Technical Design Document
 
-> Client Layer (React Native / Expo) · v1.0 · April 2026
+> Client Layer (React Native / Expo) · v1.1 · April 2026
 
 ---
 
@@ -267,4 +267,92 @@ eas update --branch production --message "Hotfix: STS calc"
 
 ---
 
-*FinFlow TechDesign v1.0 — April 2026*
+---
+
+## 9. Money Map — Cross-Institution Aggregation (v1.1)
+
+### Purpose
+
+Give users a single-screen answer to: *"Across all my banks and accounts — where does my money come from, where does it go, what do I own, and what do I owe this month?"*
+
+### Aggregation Functions (computed in screen via `useMemo`)
+
+```typescript
+// 1. Total balance across all institutions
+const totalBalanceCents = accounts.reduce((s, a) => s + a.balanceCents, 0);
+
+// 2. Group accounts by institution
+const byInstitution = accounts.reduce((map, a) => {
+  if (!map[a.institution]) map[a.institution] = { accounts: [], color: a.color };
+  map[a.institution].accounts.push(a);
+  return map;
+}, {} as Record<string, { accounts: AccountRecord[]; color: string }>);
+
+// 3. Current-month transactions
+const now = new Date();
+const monthTxns = transactions.filter(t => {
+  const d = new Date(t.date);
+  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+});
+
+// 4. Inflow: credits grouped by institution
+const inflowByInstitution = monthTxns
+  .filter(t => !t.isDebit)
+  .reduce((map, t) => {
+    const acct = accounts.find(a => a.id === t.accountId);
+    const inst = acct?.institution ?? 'Unknown';
+    map[inst] = (map[inst] ?? 0) + t.amountCents;
+    return map;
+  }, {} as Record<string, number>);
+
+// 5. Expense spend by category
+const spendByCategory = monthTxns
+  .filter(t => t.isDebit)
+  .reduce((map, t) => {
+    map[t.category] = (map[t.category] ?? 0) + t.amountCents;
+    return map;
+  }, {} as Record<string, number>);
+
+// 6. Savings & investment accounts
+const savingsAccounts  = accounts.filter(a => a.type === 'savings');
+const investAccounts   = accounts.filter(a => a.type === 'investment');
+
+// 7. Bills due this calendar month
+const monthBills = bills.filter(b => {
+  const d = new Date(b.dueDate);
+  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+});
+```
+
+### CategoryRow Bar Width Calculation
+
+```typescript
+const maxSpend = Math.max(...Object.values(spendByCategory));
+const barWidth = (categoryAmount / maxSpend) * 100; // percentage string for style
+```
+
+### Institution Net Position
+
+```typescript
+const institutionNet = (inst: string) =>
+  byInstitution[inst].accounts.reduce((s, a) =>
+    // credit balances are negative debt; add as negative
+    a.type === 'credit' ? s + a.balanceCents : s + a.balanceCents, 0);
+```
+
+### Component: `<MoneyMapScreen />`
+
+File: `app/main/money-map.tsx`
+
+Props: none (reads from `useAppContext`)
+
+Sections rendered top-to-bottom:
+1. `TotalBalanceCard` — net worth across all institutions, color-coded institution rows
+2. `InflowSection` — per-institution inflow cards for current month
+3. `ExpenseBreakdownSection` — category bars (top 6), total monthly spend
+4. `SavingsInvestmentSection` — savings APY cards + investment account values
+5. `BillsThisMonthSection` — all bills due in current month, grouped by status (overdue / due soon / upcoming / paid)
+
+---
+
+*FinFlow TechDesign v1.1 — April 2026*

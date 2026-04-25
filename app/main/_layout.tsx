@@ -31,6 +31,13 @@ export default function MainLayout() {
         }}
       />
       <Tabs.Screen
+        name="money-map"
+        options={{
+          title: 'Money Map',
+          tabBarIcon: () => <Text style={{ fontSize: 20 }}>🗺️</Text>,
+        }}
+      />
+      <Tabs.Screen
         name="alerts"
         options={{
           title: 'Alerts',

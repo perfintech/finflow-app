@@ -504,69 +504,227 @@ const H: UserFinancialProfile = {
   sparklineData: [0.65, 0.70, 0.74, 0.78, 0.84, 0.90],
 };
 
-// ─── TEMPLATES FOR I–L (condensed) ───────────────────────────────────────────
-function makeProfile(
-  letter: string, name: string, email: string, initials: string,
-  bank: string, bankColor: string, tier: 'free'|'premium',
-  checking: number, savings: number, credit: number, invest: number,
-  netWorth: number, sts: number, income: number, spend: number,
-  sparkline: number[]
-): UserFinancialProfile {
-  const id = `u_${letter}`;
-  return {
-    user: { id, name, email, avatarInitials: initials, planTier: tier,
-      bankName: bank, bankColor, onboardedAt: fmt(subDays(today, 30)),
-      greeting: name.split(' ')[0] },
-    accounts: [
-      { id:`a_${letter}1`, userId:id, name:`${bank} Checking`, type:'checking', institution:bank,
-        balanceCents: Math.round(checking*100), color:'#00f5b0', logoAbbrev:bank.slice(0,4).toUpperCase(), updatedAt: fmt(today) },
-      { id:`a_${letter}2`, userId:id, name:`${bank} Savings`, type:'savings', institution:bank,
-        balanceCents: Math.round(savings*100), interestRate:4.8, color:'#5b8dff', logoAbbrev:bank.slice(0,4).toUpperCase(), updatedAt: fmt(today) },
-      ...(credit > 0 ? [{ id:`a_${letter}3`, userId:id, name:'Credit Card', type:'credit' as const, institution:bank,
-        balanceCents: Math.round(-credit*100), dueDate: fmt(addDays(today,10)), color:'#ffb347', logoAbbrev:'CARD', updatedAt: fmt(today) }] : []),
-      ...(invest > 0 ? [{ id:`a_${letter}4`, userId:id, name:'Investment', type:'investment' as const, institution:bank,
-        balanceCents: Math.round(invest*100), interestRate:8.0, color:'#a78bfa', logoAbbrev:'INVT', updatedAt: fmt(today) }] : []),
-    ],
-    transactions: [
-      { id:`t_${letter}1`, accountId:`a_${letter}1`, userId:id, merchant:'Grocery Store', merchantIcon:'🛒', amountCents:9800, isDebit:true, category:'Food', date: fmt(subDays(today,2)), isSubscription:false },
-      { id:`t_${letter}2`, accountId:`a_${letter}1`, userId:id, merchant:'Employer Payroll', merchantIcon:'💵', amountCents:Math.round(income*100), isDebit:false, category:'Income', date: fmt(subDays(today,5)), isSubscription:false },
-      { id:`t_${letter}3`, accountId:`a_${letter}1`, userId:id, merchant:'Rent', merchantIcon:'🏠', amountCents:Math.round(spend*0.4*100), isDebit:true, category:'Rent', date: fmt(subDays(today,8)), isSubscription:false },
-      { id:`t_${letter}4`, accountId:`a_${letter}1`, userId:id, merchant:'Netflix', merchantIcon:'📺', amountCents:1799, isDebit:true, category:'Entertainment', date: fmt(subDays(today,10)), isSubscription:true },
-      { id:`t_${letter}5`, accountId:`a_${letter}1`, userId:id, merchant:'Coffee Shop', merchantIcon:'☕', amountCents:640, isDebit:true, category:'Food', date: fmt(subDays(today,12)), isSubscription:false },
-    ],
-    bills: [
-      { id:`b_${letter}1`, userId:id, name:'Rent', icon:'🏠', amountCents:Math.round(spend*0.4*100), dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:`a_${letter}1`, color:'#ffb347' },
-      { id:`b_${letter}2`, userId:id, name:'Internet', icon:'📡', amountCents:8900, dueDate: fmt(addDays(today,7)), source:'email', status:'due_soon', accountId:`a_${letter}1`, color:'#5b8dff' },
-      { id:`b_${letter}3`, userId:id, name:'Electric', icon:'⚡', amountCents:12000, dueDate: fmt(addDays(today,14)), source:'email', status:'upcoming', accountId:`a_${letter}1`, color:'#a78bfa' },
-    ],
-    subscriptions: [
-      { id:`s_${letter}1`, userId:id, name:'Netflix', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:3, nextBillingDate: fmt(addDays(today,10)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
-      { id:`s_${letter}2`, userId:id, name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,15)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
-      { id:`s_${letter}3`, userId:id, name:'Planet Fitness', icon:'💪', amountCents:2499, billingCycle:'monthly', lastUsedDaysAgo:35, nextBillingDate: fmt(addDays(today,20)), category:'Health', isWaste:true, iconBg:'rgba(0,100,255,0.10)' },
-      { id:`s_${letter}4`, userId:id, name:'Amazon Prime', icon:'📦', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:5, nextBillingDate: fmt(addDays(today,25)), category:'Shopping', isWaste:false, iconBg:'rgba(255,153,0,0.10)' },
-    ],
-    alerts: [
-      { id:`al_${letter}1`, userId:id, type:'danger', icon:'📡', title:'Internet bill due in 7 days', description:`$89 due soon. Pay from ${bank} Checking.`, timeAgo:'5 hours ago', isRead:false, actionLabel:'Pay Now →', amountCents:8900 },
-      { id:`al_${letter}2`, userId:id, type:'success', icon:'💵', title:'Payroll received', description:`$${(income).toLocaleString()} deposited. Safe to Spend updated.`, timeAgo:'5 days ago', isRead:true, amountCents:Math.round(income*100) },
-      { id:`al_${letter}3`, userId:id, type:'warning', icon:'💪', title:'Planet Fitness unused 35 days', description:'$24.99/mo. Cancel to save $300/yr.', timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:2499 },
-    ],
-    cashflow: buildCashflow(id, income, spend),
-    projection: { thirtyDay: Math.round((income-spend)*1), sixtyDay: Math.round((income-spend)*2), ninetyDay: Math.round((income-spend)*3) },
-    trip: null,
-    netWorthCents: Math.round(netWorth*100),
-    safeToSpendCents: Math.round(sts*100),
-    monthlyIncomeCents: Math.round(income*100),
-    monthlySpendCents: Math.round(spend*100),
-    subscriptionsTotalMonthlyCents: 6896,
-    subscriptionsWastedMonthlyCents: 2499,
-    sparklineData: sparkline,
-  };
-}
 
-const I = makeProfile('i','Iris Ingram','iris@example.com','II','USAA','#003087','free',1840,1200,240,0,28600,920,4800,3800,[0.22,0.28,0.25,0.31,0.35,0.38]);
-const J = makeProfile('j','James Johnson','james@example.com','JJ','Chase Bank','#003087','premium',5200,18400,640,48200,224700,2840,14200,9600,[0.48,0.54,0.58,0.62,0.67,0.72]);
-const K = makeProfile('k','Kim Kim','kim@example.com','KK','Silicon Valley Bank','#7b2ff7','premium',8400,24000,1200,18000,91300,4100,12000,7800,[0.40,0.46,0.50,0.55,0.60,0.65]);
-const L = makeProfile('l','Leo Lopez','leo@example.com','LL','Chime','#00d4a1','free',420,0,180,0,4200,180,2200,1900,[0.10,0.12,0.14,0.13,0.15,0.17]);
+// ═══════════════════════════════════════════════════════════════════════════════
+// I — Iris Ingram  |  Insurance Agent · USAA · Free
+// ═══════════════════════════════════════════════════════════════════════════════
+const I: UserFinancialProfile = {
+  user: { id:'u_i', name:'Iris Ingram', email:'iris@example.com', avatarInitials:'II',
+    planTier:'free', bankName:'USAA', bankColor:'#003087',
+    onboardedAt: fmt(subDays(today,60)), greeting:'Iris' },
+  accounts: [
+    { id:'a_i1', userId:'u_i', name:'USAA Checking', type:'checking', institution:'USAA',
+      balanceCents:184000, color:'#00f5b0', logoAbbrev:'USAA', updatedAt: fmt(today) },
+    { id:'a_i2', userId:'u_i', name:'USAA Savings', type:'savings', institution:'USAA',
+      balanceCents:120000, interestRate:4.2, color:'#5b8dff', logoAbbrev:'USAA', updatedAt: fmt(today) },
+    { id:'a_i3', userId:'u_i', name:'Discover It', type:'credit', institution:'Discover',
+      balanceCents:-24000, dueDate: fmt(addDays(today,10)), color:'#ffb347', logoAbbrev:'DISC', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_i1', accountId:'a_i1', userId:'u_i', merchant:'Allstate Corp Payroll', merchantIcon:'💵', amountCents:480000, isDebit:false, category:'Income', date: fmt(subDays(today,3)), isSubscription:false },
+    { id:'t_i2', accountId:'a_i1', userId:'u_i', merchant:'Rent', merchantIcon:'🏠', amountCents:152000, isDebit:true, category:'Rent', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_i3', accountId:'a_i1', userId:'u_i', merchant:'Walmart', merchantIcon:'🛒', amountCents:8400, isDebit:true, category:'Food', date: fmt(subDays(today,7)), isSubscription:false },
+    { id:'t_i4', accountId:'a_i3', userId:'u_i', merchant:'ClassPass', merchantIcon:'💪', amountCents:7900, isDebit:true, category:'Health', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_i5', accountId:'a_i1', userId:'u_i', merchant:'CVS Pharmacy', merchantIcon:'💊', amountCents:4200, isDebit:true, category:'Health', date: fmt(subDays(today,14)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_i1', userId:'u_i', name:'Rent', icon:'🏠', amountCents:152000, dueDate: fmt(addDays(today,22)), source:'manual', status:'upcoming', accountId:'a_i1', color:'#ffb347' },
+    { id:'b_i2', userId:'u_i', name:'Car Insurance', icon:'🚗', amountCents:14800, dueDate: fmt(addDays(today,8)), source:'email', status:'due_soon', accountId:'a_i1', color:'#5b8dff' },
+    { id:'b_i3', userId:'u_i', name:'Internet', icon:'📡', amountCents:6900, dueDate: fmt(addDays(today,12)), source:'email', status:'upcoming', accountId:'a_i1', color:'#a78bfa' },
+  ],
+  subscriptions: [
+    { id:'s_i1', userId:'u_i', name:'ClassPass', icon:'💪', amountCents:7900, billingCycle:'monthly', lastUsedDaysAgo:38, nextBillingDate: fmt(addDays(today,10)), category:'Health', isWaste:true, iconBg:'rgba(91,141,255,0.12)' },
+    { id:'s_i2', userId:'u_i', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_i3', userId:'u_i', name:'Hulu', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:52, nextBillingDate: fmt(addDays(today,5)), category:'Entertainment', isWaste:true, iconBg:'rgba(28,231,131,0.10)' },
+    { id:'s_i4', userId:'u_i', name:'Amazon Prime', icon:'📦', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:2, nextBillingDate: fmt(addDays(today,25)), category:'Shopping', isWaste:false, iconBg:'rgba(255,153,0,0.10)' },
+  ],
+  alerts: [
+    { id:'al_i1', userId:'u_i', type:'danger', icon:'🚗', title:'Car insurance due in 8 days', description:'$148.00 due. Pay from USAA Checking (bal: $1,840).', timeAgo:'1 hour ago', isRead:false, actionLabel:'Pay Now →', amountCents:14800 },
+    { id:'al_i2', userId:'u_i', type:'warning', icon:'💪', title:'ClassPass unused 38 days', description:'$79/mo. No check-ins since last month. Cancel to save $948/yr.', timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:7900 },
+    { id:'al_i3', userId:'u_i', type:'warning', icon:'📺', title:'Hulu unused 52 days', description:'$17.99/mo and zero streams. Cancel to save $216/yr.', timeAgo:'3 days ago', isRead:false, actionLabel:'Cancel →', amountCents:1799 },
+  ],
+  cashflow: buildCashflow('u_i', 4800, 3800),
+  projection: { thirtyDay: 1000, sixtyDay: 1900, ninetyDay: 2700 },
+  trip: null,
+  netWorthCents: 2860000,
+  safeToSpendCents: 92000,
+  monthlyIncomeCents: 480000,
+  monthlySpendCents: 380000,
+  subscriptionsTotalMonthlyCents: 12297,
+  subscriptionsWastedMonthlyCents: 9699,
+  sparklineData: [0.22, 0.28, 0.25, 0.31, 0.35, 0.38],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// J — James Johnson  |  Junior Dev · Tech Startup · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const J: UserFinancialProfile = {
+  user: { id:'u_j', name:'James Johnson', email:'james@example.com', avatarInitials:'JJ',
+    planTier:'premium', bankName:'Chase Bank', bankColor:'#003087',
+    onboardedAt: fmt(subDays(today,120)), greeting:'James' },
+  accounts: [
+    { id:'a_j1', userId:'u_j', name:'Chase Checking', type:'checking', institution:'Chase',
+      balanceCents:520000, color:'#00f5b0', logoAbbrev:'CHASE', updatedAt: fmt(today) },
+    { id:'a_j2', userId:'u_j', name:'Marcus HYSA', type:'savings', institution:'Marcus',
+      balanceCents:1840000, interestRate:5.0, color:'#5b8dff', logoAbbrev:'MARC', updatedAt: fmt(today) },
+    { id:'a_j3', userId:'u_j', name:'Chase Freedom', type:'credit', institution:'Chase',
+      balanceCents:-64000, dueDate: fmt(addDays(today,14)), color:'#ffb347', logoAbbrev:'CFRM', updatedAt: fmt(today) },
+    { id:'a_j4', userId:'u_j', name:'Vanguard Roth IRA', type:'investment', institution:'Vanguard',
+      balanceCents:4820000, interestRate:9.2, color:'#a78bfa', logoAbbrev:'VANG', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_j1', accountId:'a_j1', userId:'u_j', merchant:'TechStartup Inc Payroll', merchantIcon:'💵', amountCents:1420000, isDebit:false, category:'Income', date: fmt(subDays(today,4)), isSubscription:false },
+    { id:'t_j2', accountId:'a_j1', userId:'u_j', merchant:'Rent', merchantIcon:'🏠', amountCents:384000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_j3', accountId:'a_j3', userId:'u_j', merchant:'Apple Store', merchantIcon:'🍎', amountCents:129900, isDebit:true, category:'Shopping', date: fmt(subDays(today,8)), isSubscription:false },
+    { id:'t_j4', accountId:'a_j1', userId:'u_j', merchant:'GitHub Copilot', merchantIcon:'🤖', amountCents:1900, isDebit:true, category:'Business', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_j5', accountId:'a_j3', userId:'u_j', merchant:'LinkedIn Premium', merchantIcon:'💼', amountCents:3999, isDebit:true, category:'Business', date: fmt(subDays(today,15)), isSubscription:true },
+    { id:'t_j6', accountId:'a_j1', userId:'u_j', merchant:'DoorDash', merchantIcon:'🍔', amountCents:4800, isDebit:true, category:'Food', date: fmt(subDays(today,18)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_j1', userId:'u_j', name:'Rent', icon:'🏠', amountCents:384000, dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:'a_j1', color:'#ffb347' },
+    { id:'b_j2', userId:'u_j', name:'Chase Freedom', icon:'💳', amountCents:64000, dueDate: fmt(addDays(today,14)), source:'email', status:'upcoming', accountId:'a_j1', color:'#ff5252' },
+    { id:'b_j3', userId:'u_j', name:'Electric', icon:'⚡', amountCents:9800, dueDate: fmt(addDays(today,6)), source:'email', status:'due_soon', accountId:'a_j1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_j1', userId:'u_j', name:'GitHub Copilot', icon:'🤖', amountCents:1900, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,10)), category:'Business', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_j2', userId:'u_j', name:'LinkedIn Premium', icon:'💼', amountCents:3999, billingCycle:'monthly', lastUsedDaysAgo:45, nextBillingDate: fmt(addDays(today,15)), category:'Business', isWaste:true, iconBg:'rgba(0,119,181,0.12)' },
+    { id:'s_j3', userId:'u_j', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,22)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_j4', userId:'u_j', name:'Netflix', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:5, nextBillingDate: fmt(addDays(today,8)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_j5', userId:'u_j', name:'Headspace', icon:'🧘', amountCents:1299, billingCycle:'monthly', lastUsedDaysAgo:28, nextBillingDate: fmt(addDays(today,17)), category:'Health', isWaste:true, iconBg:'rgba(255,109,40,0.10)' },
+  ],
+  alerts: [
+    { id:'al_j1', userId:'u_j', type:'success', icon:'📈', title:'Roth IRA milestone: $48,200', description:'Your Vanguard IRA crossed $48K. Up 9.2% YTD — keep max contributions going.', timeAgo:'2 days ago', isRead:false, amountCents:4820000 },
+    { id:'al_j2', userId:'u_j', type:'warning', icon:'💼', title:'LinkedIn Premium unused 45 days', description:"$39.99/mo. Haven't logged in since March. Cancel to save $480/yr.", timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:3999 },
+    { id:'al_j3', userId:'u_j', type:'danger', icon:'⚡', title:'Electric bill due in 6 days', description:'$98 due soon. Pay from Chase Checking.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:9800 },
+  ],
+  cashflow: buildCashflow('u_j', 14200, 9600),
+  projection: { thirtyDay: 4600, sixtyDay: 8900, ninetyDay: 13600 },
+  trip: null,
+  netWorthCents: 22470000,
+  safeToSpendCents: 284000,
+  monthlyIncomeCents: 1420000,
+  monthlySpendCents: 960000,
+  subscriptionsTotalMonthlyCents: 10096,
+  subscriptionsWastedMonthlyCents: 5298,
+  sparklineData: [0.48, 0.54, 0.58, 0.62, 0.67, 0.72],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// K — Kim Kim  |  Kindergarten Teacher · First Republic · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const K: UserFinancialProfile = {
+  user: { id:'u_k', name:'Kim Kim', email:'kim@example.com', avatarInitials:'KK',
+    planTier:'premium', bankName:'First Republic', bankColor:'#7b2ff7',
+    onboardedAt: fmt(subDays(today,365)), greeting:'Kim' },
+  accounts: [
+    { id:'a_k1', userId:'u_k', name:'First Republic Checking', type:'checking', institution:'First Republic',
+      balanceCents:840000, color:'#00f5b0', logoAbbrev:'FRB', updatedAt: fmt(today) },
+    { id:'a_k2', userId:'u_k', name:'Ally HYSA', type:'savings', institution:'Ally',
+      balanceCents:2400000, interestRate:4.5, color:'#5b8dff', logoAbbrev:'ALLY', updatedAt: fmt(today) },
+    { id:'a_k3', userId:'u_k', name:'Capital One Venture', type:'credit', institution:'Capital One',
+      balanceCents:-120000, dueDate: fmt(addDays(today,9)), color:'#ffb347', logoAbbrev:'CAPO', updatedAt: fmt(today) },
+    { id:'a_k4', userId:'u_k', name:'Vanguard 403(b)', type:'investment', institution:'Vanguard',
+      balanceCents:1800000, interestRate:7.8, color:'#a78bfa', logoAbbrev:'VANG', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_k1', accountId:'a_k1', userId:'u_k', merchant:'School District Payroll', merchantIcon:'💵', amountCents:1200000, isDebit:false, category:'Income', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_k2', accountId:'a_k1', userId:'u_k', merchant:'Rent', merchantIcon:'🏠', amountCents:312000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_k3', accountId:'a_k3', userId:'u_k', merchant:"Teachers Pay Teachers", merchantIcon:'📚', amountCents:2900, isDebit:true, category:'Education', date: fmt(subDays(today,8)), isSubscription:false },
+    { id:'t_k4', accountId:'a_k1', userId:'u_k', merchant:"Trader Joe's", merchantIcon:'🛒', amountCents:11200, isDebit:true, category:'Food', date: fmt(subDays(today,10)), isSubscription:false },
+    { id:'t_k5', accountId:'a_k3', userId:'u_k', merchant:'Disney+', merchantIcon:'🏰', amountCents:1399, isDebit:true, category:'Entertainment', date: fmt(subDays(today,14)), isSubscription:true },
+  ],
+  bills: [
+    { id:'b_k1', userId:'u_k', name:'Rent', icon:'🏠', amountCents:312000, dueDate: fmt(addDays(today,18)), source:'manual', status:'upcoming', accountId:'a_k1', color:'#ffb347' },
+    { id:'b_k2', userId:'u_k', name:'Capital One', icon:'💳', amountCents:120000, dueDate: fmt(addDays(today,9)), source:'email', status:'due_soon', accountId:'a_k1', color:'#ff5252' },
+    { id:'b_k3', userId:'u_k', name:'Student Loan', icon:'🎓', amountCents:28000, dueDate: fmt(addDays(today,15)), source:'email', status:'upcoming', accountId:'a_k1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_k1', userId:'u_k', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,12)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_k2', userId:'u_k', name:'Netflix', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:3, nextBillingDate: fmt(addDays(today,20)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_k3', userId:'u_k', name:'Disney+', icon:'🏰', amountCents:1399, billingCycle:'monthly', lastUsedDaysAgo:1, nextBillingDate: fmt(addDays(today,14)), category:'Entertainment', isWaste:false, iconBg:'rgba(17,60,110,0.12)' },
+    { id:'s_k4', userId:'u_k', name:'iCloud 200GB', icon:'☁️', amountCents:299, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,7)), category:'Storage', isWaste:false, iconBg:'rgba(91,141,255,0.12)' },
+    { id:'s_k5', userId:'u_k', name:'Calm App', icon:'🌊', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:44, nextBillingDate: fmt(addDays(today,18)), category:'Health', isWaste:true, iconBg:'rgba(0,150,200,0.10)' },
+  ],
+  alerts: [
+    { id:'al_k1', userId:'u_k', type:'success', icon:'🎓', title:'Emergency fund: 3 months reached!', description:"You hit $24K — that's 3 months of expenses. Great milestone, Kim!", timeAgo:'This week', isRead:false, amountCents:2400000 },
+    { id:'al_k2', userId:'u_k', type:'danger', icon:'💳', title:'Capital One due in 9 days', description:'$1,200 due. Pay from First Republic Checking?', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:120000 },
+    { id:'al_k3', userId:'u_k', type:'warning', icon:'🌊', title:'Calm unused 44 days', description:'$14.99/mo with no sessions. Cancel to save $180/yr.', timeAgo:'2 days ago', isRead:false, actionLabel:'Cancel →', amountCents:1499 },
+  ],
+  cashflow: buildCashflow('u_k', 12000, 7800),
+  projection: { thirtyDay: 4200, sixtyDay: 8100, ninetyDay: 12400 },
+  trip: {
+    id:'trip_k1', userId:'u_k', name:'Hawaii Summer Trip', destination:'LAX → Honolulu',
+    startDate: fmt(addDays(today,45)), endDate: fmt(addDays(today,52)), nights:7, travelers:1,
+    budgetCents:400000, spentCents:180000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'✈️', label:'FLIGHTS', spentCents:120000, budgetCents:140000, fillColor:'#5b8dff' },
+      { icon:'🏨', label:'HOTEL', spentCents:60000, budgetCents:160000, fillColor:'#a78bfa' },
+      { icon:'🍍', label:'FOOD', spentCents:0, budgetCents:60000, fillColor:'#ffb347' },
+      { icon:'🏄', label:'ACTIVITIES', spentCents:0, budgetCents:40000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,45)), event:'Depart LAX → HNL', icon:'✈️', amountCents:120000, isCovered:true },
+      { date: fmt(addDays(today,45)), event:'Sheraton Waikiki check-in', icon:'🏨', amountCents:60000, isCovered:true },
+      { date: fmt(addDays(today,52)), event:'Return HNL → LAX', icon:'✈️', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 9130000,
+  safeToSpendCents: 410000,
+  monthlyIncomeCents: 1200000,
+  monthlySpendCents: 780000,
+  subscriptionsTotalMonthlyCents: 6095,
+  subscriptionsWastedMonthlyCents: 1499,
+  sparklineData: [0.40, 0.46, 0.50, 0.55, 0.60, 0.65],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// L — Leo Lopez  |  Lyft/Gig Worker · Chime · Free
+// ═══════════════════════════════════════════════════════════════════════════════
+const L: UserFinancialProfile = {
+  user: { id:'u_l', name:'Leo Lopez', email:'leo@example.com', avatarInitials:'LL',
+    planTier:'free', bankName:'Chime', bankColor:'#00d4a1',
+    onboardedAt: fmt(subDays(today,7)), greeting:'Leo' },
+  accounts: [
+    { id:'a_l1', userId:'u_l', name:'Chime Spending', type:'checking', institution:'Chime',
+      balanceCents:42000, color:'#00f5b0', logoAbbrev:'CHIM', updatedAt: fmt(today) },
+    { id:'a_l2', userId:'u_l', name:'Chime Savings', type:'savings', institution:'Chime',
+      balanceCents:0, color:'#5b8dff', logoAbbrev:'CHIM', updatedAt: fmt(today) },
+    { id:'a_l3', userId:'u_l', name:'Capital One', type:'credit', institution:'Capital One',
+      balanceCents:-18000, dueDate: fmt(addDays(today,4)), color:'#ffb347', logoAbbrev:'CAPO', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_l1', accountId:'a_l1', userId:'u_l', merchant:'Lyft Driver Earnings', merchantIcon:'🚗', amountCents:84000, isDebit:false, category:'Income', date: fmt(subDays(today,2)), isSubscription:false },
+    { id:'t_l2', accountId:'a_l1', userId:'u_l', merchant:'Gas Station', merchantIcon:'⛽', amountCents:8400, isDebit:true, category:'Transport', date: fmt(subDays(today,3)), isSubscription:false },
+    { id:'t_l3', accountId:'a_l1', userId:'u_l', merchant:"McDonald's", merchantIcon:'🍟', amountCents:1200, isDebit:true, category:'Food', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_l4', accountId:'a_l1', userId:'u_l', merchant:'Spotify', merchantIcon:'🎵', amountCents:1099, isDebit:true, category:'Entertainment', date: fmt(subDays(today,8)), isSubscription:true },
+    { id:'t_l5', accountId:'a_l1', userId:'u_l', merchant:'Phone Bill', merchantIcon:'📱', amountCents:4500, isDebit:true, category:'Utilities', date: fmt(subDays(today,10)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_l1', userId:'u_l', name:'Capital One', icon:'💳', amountCents:18000, dueDate: fmt(addDays(today,4)), source:'email', status:'due_soon', accountId:'a_l1', color:'#ff5252' },
+    { id:'b_l2', userId:'u_l', name:'Phone', icon:'📱', amountCents:4500, dueDate: fmt(addDays(today,12)), source:'email', status:'upcoming', accountId:'a_l1', color:'#5b8dff' },
+    { id:'b_l3', userId:'u_l', name:'Gas (weekly avg)', icon:'⛽', amountCents:8400, dueDate: fmt(addDays(today,7)), source:'manual', status:'due_soon', accountId:'a_l1', color:'#ffb347' },
+  ],
+  subscriptions: [
+    { id:'s_l1', userId:'u_l', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,8)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_l2', userId:'u_l', name:'Netflix', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:14, nextBillingDate: fmt(addDays(today,20)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_l3', userId:'u_l', name:'Xbox Game Pass', icon:'🎮', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:60, nextBillingDate: fmt(addDays(today,3)), category:'Entertainment', isWaste:true, iconBg:'rgba(16,124,16,0.12)' },
+  ],
+  alerts: [
+    { id:'al_l1', userId:'u_l', type:'danger', icon:'⚠️', title:'Low balance warning', description:'Chime Spending at $420. Capital One $180 due in 4 days — cutting it close.', timeAgo:'Today', isRead:false, amountCents:42000 },
+    { id:'al_l2', userId:'u_l', type:'danger', icon:'💳', title:'Capital One due in 4 days', description:'$180 due. Chime balance: $420. Recommend paying now.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:18000 },
+    { id:'al_l3', userId:'u_l', type:'warning', icon:'🎮', title:'Xbox Game Pass unused 60 days', description:'$14.99/mo. No gaming in 2 months. Cancel to save $180/yr.', timeAgo:'2 days ago', isRead:false, actionLabel:'Cancel →', amountCents:1499 },
+  ],
+  cashflow: buildCashflow('u_l', 2200, 1900),
+  projection: { thirtyDay: 300, sixtyDay: 560, ninetyDay: 790 },
+  trip: null,
+  netWorthCents: 420000,
+  safeToSpendCents: 18000,
+  monthlyIncomeCents: 220000,
+  monthlySpendCents: 190000,
+  subscriptionsTotalMonthlyCents: 4397,
+  subscriptionsWastedMonthlyCents: 1499,
+  sparklineData: [0.10, 0.12, 0.14, 0.13, 0.15, 0.17],
+};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // M — Maya Mitchell  |  Marketing Manager · Premium  (primary demo persona)
@@ -651,19 +809,785 @@ const M: UserFinancialProfile = {
   sparklineData: [0.50, 0.54, 0.57, 0.59, 0.63, 0.67],
 };
 
-const N = makeProfile('n','Nina Nguyen','nina@example.com','NN','Ally Bank','#7b2ff7','free',2840,4200,380,0,52100,1480,5600,4200,[0.28,0.32,0.35,0.38,0.41,0.45]);
-const O = makeProfile('o','Oscar Owens','oscar@example.com','OO','Schwab','#1a6ca8','premium',48000,120000,8400,980000,1240000,24000,42000,18000,[0.80,0.83,0.86,0.88,0.91,0.94]);
-const P = makeProfile('p','Priya Patel','priya@example.com','PP','Chase Bank','#003087','premium',6800,28000,1200,120000,178500,3200,12400,7600,[0.55,0.60,0.64,0.68,0.72,0.77]);
-const Q = makeProfile('q','Quinn Quinn','quinn@example.com','QQ','Chime','#00d4a1','free',890,0,0,0,8900,340,3200,2900,[0.08,0.10,0.09,0.12,0.11,0.14]);
-const R = makeProfile('r','Ryan Reed','ryan@example.com','RR','Bank of America','#c0392b','premium',4200,18000,960,32000,88700,1980,9400,6200,[0.38,0.43,0.47,0.51,0.55,0.60]);
-const S = makeProfile('s','Sara Singh','sara@example.com','SS','TD Bank','#1a9c3e','free',1840,4800,520,0,31200,840,4200,3600,[0.20,0.24,0.27,0.30,0.33,0.36]);
-const T = makeProfile('t','Tyler Torres','tyler@example.com','TT','Coinbase','#0052ff','free',2600,8400,420,18000,64800,1240,5800,4400,[0.32,0.40,0.35,0.48,0.42,0.55]);
-const U = makeProfile('u','Uma Upton','uma@example.com','UU','Fidelity','#006633','premium',8400,48000,0,240000,312100,4200,14800,8200,[0.60,0.64,0.68,0.71,0.75,0.80]);
-const V = makeProfile('v','Vince Vega','vince@example.com','VV','Wells Fargo','#c0392b','free',3800,12000,2400,0,76400,1640,8200,6800,[0.38,0.40,0.42,0.44,0.46,0.50]);
-const W = makeProfile('w','Wendy Walsh','wendy@example.com','WW','Vanguard','#722f37','premium',18000,84000,0,380000,523600,8400,22000,9800,[0.75,0.78,0.80,0.83,0.86,0.90]);
-const X = makeProfile('x','Xander Xu','xander@example.com','XX','Interactive Brokers','#ff6600','premium',24000,64000,0,280000,387200,10800,28000,12000,[0.68,0.72,0.75,0.78,0.82,0.87]);
-const Y = makeProfile('y','Yuki Yamamoto','yuki@example.com','YY','Marcus','#003087','premium',7200,36000,1800,100000,165900,3400,11200,7200,[0.52,0.56,0.60,0.64,0.68,0.72]);
-const Z = makeProfile('z','Zoe Zhang','zoe@example.com','ZZ','Vanguard','#722f37','premium',84000,280000,0,720000,1050000,38000,84000,24000,[0.88,0.90,0.92,0.93,0.95,0.97]);
+// ═══════════════════════════════════════════════════════════════════════════════
+// N — Nina Nguyen  |  Hospital Nurse · Ally Bank · Free
+// ═══════════════════════════════════════════════════════════════════════════════
+const N: UserFinancialProfile = {
+  user: { id:'u_n', name:'Nina Nguyen', email:'nina@example.com', avatarInitials:'NN',
+    planTier:'free', bankName:'Ally Bank', bankColor:'#7b2ff7',
+    onboardedAt: fmt(subDays(today,45)), greeting:'Nina' },
+  accounts: [
+    { id:'a_n1', userId:'u_n', name:'Ally Checking', type:'checking', institution:'Ally',
+      balanceCents:284000, color:'#00f5b0', logoAbbrev:'ALLY', updatedAt: fmt(today) },
+    { id:'a_n2', userId:'u_n', name:'Ally HYSA', type:'savings', institution:'Ally',
+      balanceCents:420000, interestRate:4.8, color:'#5b8dff', logoAbbrev:'ALLY', updatedAt: fmt(today) },
+    { id:'a_n3', userId:'u_n', name:'Visa Signature', type:'credit', institution:'Visa',
+      balanceCents:-38000, dueDate: fmt(addDays(today,8)), color:'#ffb347', logoAbbrev:'VISA', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_n1', accountId:'a_n1', userId:'u_n', merchant:'Regional Hospital Payroll', merchantIcon:'💵', amountCents:560000, isDebit:false, category:'Income', date: fmt(subDays(today,4)), isSubscription:false },
+    { id:'t_n2', accountId:'a_n1', userId:'u_n', merchant:'Rent', merchantIcon:'🏠', amountCents:168000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_n3', accountId:'a_n1', userId:'u_n', merchant:'Walgreens', merchantIcon:'💊', amountCents:3200, isDebit:true, category:'Health', date: fmt(subDays(today,8)), isSubscription:false },
+    { id:'t_n4', accountId:'a_n3', userId:'u_n', merchant:'ClassPass', merchantIcon:'💪', amountCents:7900, isDebit:true, category:'Health', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_n5', accountId:'a_n1', userId:'u_n', merchant:"Trader Joe's", merchantIcon:'🛒', amountCents:9600, isDebit:true, category:'Food', date: fmt(subDays(today,12)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_n1', userId:'u_n', name:'Rent', icon:'🏠', amountCents:168000, dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:'a_n1', color:'#ffb347' },
+    { id:'b_n2', userId:'u_n', name:'Visa Card', icon:'💳', amountCents:38000, dueDate: fmt(addDays(today,8)), source:'email', status:'due_soon', accountId:'a_n1', color:'#ff5252' },
+    { id:'b_n3', userId:'u_n', name:'Student Loan', icon:'🎓', amountCents:32000, dueDate: fmt(addDays(today,14)), source:'email', status:'upcoming', accountId:'a_n1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_n1', userId:'u_n', name:'ClassPass', icon:'💪', amountCents:7900, billingCycle:'monthly', lastUsedDaysAgo:29, nextBillingDate: fmt(addDays(today,10)), category:'Health', isWaste:true, iconBg:'rgba(91,141,255,0.12)' },
+    { id:'s_n2', userId:'u_n', name:'Netflix', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:2, nextBillingDate: fmt(addDays(today,12)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_n3', userId:'u_n', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_n4', userId:'u_n', name:'Calm', icon:'🧘', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:55, nextBillingDate: fmt(addDays(today,5)), category:'Health', isWaste:true, iconBg:'rgba(100,150,255,0.10)' },
+  ],
+  alerts: [
+    { id:'al_n1', userId:'u_n', type:'danger', icon:'💳', title:'Visa due in 8 days', description:'$380 due. Pay from Ally Checking (bal: $2,840)?', timeAgo:'3 hours ago', isRead:false, actionLabel:'Pay Now →', amountCents:38000 },
+    { id:'al_n2', userId:'u_n', type:'warning', icon:'💪', title:'ClassPass unused 29 days', description:'$79/mo. No check-ins this month. Cancel to save $948/yr.', timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:7900 },
+    { id:'al_n3', userId:'u_n', type:'warning', icon:'🧘', title:'Calm unused 55 days', description:'$14.99/mo, no sessions opened. Cancel to save $180/yr.', timeAgo:'2 days ago', isRead:false, actionLabel:'Cancel →', amountCents:1499 },
+  ],
+  cashflow: buildCashflow('u_n', 5600, 4200),
+  projection: { thirtyDay: 1400, sixtyDay: 2700, ninetyDay: 4100 },
+  trip: null,
+  netWorthCents: 5210000,
+  safeToSpendCents: 148000,
+  monthlyIncomeCents: 560000,
+  monthlySpendCents: 420000,
+  subscriptionsTotalMonthlyCents: 12297,
+  subscriptionsWastedMonthlyCents: 9399,
+  sparklineData: [0.28, 0.32, 0.35, 0.38, 0.41, 0.45],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// O — Oscar Owens  |  Operations Director · Schwab · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const O: UserFinancialProfile = {
+  user: { id:'u_o', name:'Oscar Owens', email:'oscar@example.com', avatarInitials:'OO',
+    planTier:'premium', bankName:'Schwab', bankColor:'#1a6ca8',
+    onboardedAt: fmt(subDays(today,200)), greeting:'Oscar' },
+  accounts: [
+    { id:'a_o1', userId:'u_o', name:'Schwab Checking', type:'checking', institution:'Schwab',
+      balanceCents:4800000, color:'#00f5b0', logoAbbrev:'SCHW', updatedAt: fmt(today) },
+    { id:'a_o2', userId:'u_o', name:'Schwab HYSA', type:'savings', institution:'Schwab',
+      balanceCents:12000000, interestRate:5.2, color:'#5b8dff', logoAbbrev:'SCHW', updatedAt: fmt(today) },
+    { id:'a_o3', userId:'u_o', name:'Amex Platinum', type:'credit', institution:'Amex',
+      balanceCents:-840000, dueDate: fmt(addDays(today,16)), color:'#ffb347', logoAbbrev:'AMEX', updatedAt: fmt(today) },
+    { id:'a_o4', userId:'u_o', name:'Schwab Brokerage', type:'investment', institution:'Schwab',
+      balanceCents:98000000, interestRate:11.4, color:'#a78bfa', logoAbbrev:'SCHW', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_o1', accountId:'a_o1', userId:'u_o', merchant:'MegaCorp Payroll', merchantIcon:'💵', amountCents:4200000, isDebit:false, category:'Income', date: fmt(subDays(today,3)), isSubscription:false },
+    { id:'t_o2', accountId:'a_o3', userId:'u_o', merchant:'Capital Grille Dinner', merchantIcon:'🥩', amountCents:84000, isDebit:true, category:'Food', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_o3', accountId:'a_o1', userId:'u_o', merchant:'Mortgage', merchantIcon:'🏠', amountCents:620000, isDebit:true, category:'Rent', date: fmt(subDays(today,7)), isSubscription:false },
+    { id:'t_o4', accountId:'a_o3', userId:'u_o', merchant:'Bloomberg Terminal', merchantIcon:'📊', amountCents:34500, isDebit:true, category:'Business', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_o5', accountId:'a_o1', userId:'u_o', merchant:'Tesla Charging', merchantIcon:'⚡', amountCents:3800, isDebit:true, category:'Transport', date: fmt(subDays(today,12)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_o1', userId:'u_o', name:'Mortgage', icon:'🏠', amountCents:620000, dueDate: fmt(addDays(today,24)), source:'manual', status:'upcoming', accountId:'a_o1', color:'#ffb347' },
+    { id:'b_o2', userId:'u_o', name:'Amex Platinum', icon:'💳', amountCents:840000, dueDate: fmt(addDays(today,16)), source:'email', status:'upcoming', accountId:'a_o1', color:'#ff5252' },
+    { id:'b_o3', userId:'u_o', name:'HOA Fees', icon:'🏡', amountCents:84000, dueDate: fmt(addDays(today,5)), source:'manual', status:'due_soon', accountId:'a_o1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_o1', userId:'u_o', name:'Bloomberg Terminal', icon:'📊', amountCents:34500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,10)), category:'Business', isWaste:false, iconBg:'rgba(0,100,180,0.12)' },
+    { id:'s_o2', userId:'u_o', name:'LinkedIn Premium', icon:'💼', amountCents:3999, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Business', isWaste:false, iconBg:'rgba(0,119,181,0.12)' },
+    { id:'s_o3', userId:'u_o', name:'WSJ Digital', icon:'📰', amountCents:3899, billingCycle:'monthly', lastUsedDaysAgo:1, nextBillingDate: fmt(addDays(today,22)), category:'News', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_o4', userId:'u_o', name:'Netflix 4K', icon:'📺', amountCents:2299, billingCycle:'monthly', lastUsedDaysAgo:4, nextBillingDate: fmt(addDays(today,8)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_o5', userId:'u_o', name:'Peloton', icon:'🚴', amountCents:4400, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,14)), category:'Health', isWaste:false, iconBg:'rgba(255,100,50,0.12)' },
+  ],
+  alerts: [
+    { id:'al_o1', userId:'u_o', type:'success', icon:'📈', title:'Portfolio crossed $1M', description:'Schwab Brokerage hit $980K. Up 11.4% YTD — consider rebalancing allocation.', timeAgo:'Today', isRead:false, actionLabel:'Review →', amountCents:98000000 },
+    { id:'al_o2', userId:'u_o', type:'danger', icon:'🏡', title:'HOA fees due in 5 days', description:'$840 HOA due. Schedule from Schwab Checking.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:84000 },
+    { id:'al_o3', userId:'u_o', type:'info', icon:'💎', title:'Q4 bonus deposited', description:'$42,000 year-end bonus landed. Move to brokerage for tax-advantaged growth?', timeAgo:'3 days ago', isRead:true, actionLabel:'Invest →', amountCents:4200000 },
+  ],
+  cashflow: buildCashflow('u_o', 42000, 18000),
+  projection: { thirtyDay: 24000, sixtyDay: 48000, ninetyDay: 72000 },
+  trip: {
+    id:'trip_o1', userId:'u_o', name:'Miami Leadership Summit', destination:'JFK → Miami',
+    startDate: fmt(addDays(today,8)), endDate: fmt(addDays(today,11)), nights:3, travelers:1,
+    budgetCents:280000, spentCents:196000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'✈️', label:'FLIGHTS', spentCents:84000, budgetCents:100000, fillColor:'#5b8dff' },
+      { icon:'🏨', label:'HOTEL', spentCents:112000, budgetCents:120000, fillColor:'#a78bfa' },
+      { icon:'🥩', label:'DINING', spentCents:0, budgetCents:40000, fillColor:'#ffb347' },
+      { icon:'🚗', label:'TRANSPORT', spentCents:0, budgetCents:20000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,8)), event:'Depart JFK → MIA', icon:'✈️', amountCents:84000, isCovered:true },
+      { date: fmt(addDays(today,8)), event:'Four Seasons Miami check-in', icon:'🏨', amountCents:112000, isCovered:true },
+      { date: fmt(addDays(today,9)), event:'Leadership Summit Day 1', icon:'📊', amountCents:0, isCovered:true },
+      { date: fmt(addDays(today,11)), event:'Return MIA → JFK', icon:'✈️', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 124000000,
+  safeToSpendCents: 2400000,
+  monthlyIncomeCents: 4200000,
+  monthlySpendCents: 1800000,
+  subscriptionsTotalMonthlyCents: 49097,
+  subscriptionsWastedMonthlyCents: 0,
+  sparklineData: [0.80, 0.83, 0.86, 0.88, 0.91, 0.94],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// P — Priya Patel  |  Product Manager · Chase Bank · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const P: UserFinancialProfile = {
+  user: { id:'u_p', name:'Priya Patel', email:'priya@example.com', avatarInitials:'PP',
+    planTier:'premium', bankName:'Chase Bank', bankColor:'#003087',
+    onboardedAt: fmt(subDays(today,90)), greeting:'Priya' },
+  accounts: [
+    { id:'a_p1', userId:'u_p', name:'Chase Checking', type:'checking', institution:'Chase',
+      balanceCents:680000, color:'#00f5b0', logoAbbrev:'CHASE', updatedAt: fmt(today) },
+    { id:'a_p2', userId:'u_p', name:'Marcus HYSA', type:'savings', institution:'Marcus',
+      balanceCents:2800000, interestRate:5.0, color:'#5b8dff', logoAbbrev:'MARC', updatedAt: fmt(today) },
+    { id:'a_p3', userId:'u_p', name:'Chase Sapphire', type:'credit', institution:'Chase',
+      balanceCents:-120000, dueDate: fmt(addDays(today,11)), color:'#ffb347', logoAbbrev:'CSR', updatedAt: fmt(today) },
+    { id:'a_p4', userId:'u_p', name:'Fidelity Roth IRA', type:'investment', institution:'Fidelity',
+      balanceCents:12000000, interestRate:10.2, color:'#a78bfa', logoAbbrev:'FIDL', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_p1', accountId:'a_p1', userId:'u_p', merchant:'ProductCo Payroll', merchantIcon:'💵', amountCents:1240000, isDebit:false, category:'Income', date: fmt(subDays(today,4)), isSubscription:false },
+    { id:'t_p2', accountId:'a_p1', userId:'u_p', merchant:'Rent', merchantIcon:'🏠', amountCents:496000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_p3', accountId:'a_p3', userId:'u_p', merchant:'Notion', merchantIcon:'📝', amountCents:1600, isDebit:true, category:'Business', date: fmt(subDays(today,8)), isSubscription:true },
+    { id:'t_p4', accountId:'a_p3', userId:'u_p', merchant:'Figma', merchantIcon:'🎨', amountCents:1500, isDebit:true, category:'Business', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_p5', accountId:'a_p1', userId:'u_p', merchant:'Sweetgreen', merchantIcon:'🥗', amountCents:1840, isDebit:true, category:'Food', date: fmt(subDays(today,13)), isSubscription:false },
+    { id:'t_p6', accountId:'a_p3', userId:'u_p', merchant:'Medium Membership', merchantIcon:'📖', amountCents:500, isDebit:true, category:'News', date: fmt(subDays(today,17)), isSubscription:true },
+  ],
+  bills: [
+    { id:'b_p1', userId:'u_p', name:'Rent', icon:'🏠', amountCents:496000, dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:'a_p1', color:'#ffb347' },
+    { id:'b_p2', userId:'u_p', name:'Chase Sapphire', icon:'💳', amountCents:120000, dueDate: fmt(addDays(today,11)), source:'email', status:'upcoming', accountId:'a_p1', color:'#ff5252' },
+    { id:'b_p3', userId:'u_p', name:'Electric', icon:'⚡', amountCents:14400, dueDate: fmt(addDays(today,6)), source:'email', status:'due_soon', accountId:'a_p1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_p1', userId:'u_p', name:'Notion', icon:'📝', amountCents:1600, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,8)), category:'Productivity', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_p2', userId:'u_p', name:'Figma', icon:'🎨', amountCents:1500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,10)), category:'Design', isWaste:false, iconBg:'rgba(162,89,255,0.12)' },
+    { id:'s_p3', userId:'u_p', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,15)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_p4', userId:'u_p', name:'Apple TV+', icon:'🍎', amountCents:999, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,20)), category:'Entertainment', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_p5', userId:'u_p', name:'Medium', icon:'📖', amountCents:500, billingCycle:'monthly', lastUsedDaysAgo:42, nextBillingDate: fmt(addDays(today,17)), category:'News', isWaste:true, iconBg:'rgba(255,255,255,0.06)' },
+  ],
+  alerts: [
+    { id:'al_p1', userId:'u_p', type:'success', icon:'💎', title:'Savings milestone: $28,000!', description:"You hit $28K in Marcus HYSA. You're 1 month ahead of your $30K target.", timeAgo:'This week', isRead:false, amountCents:2800000 },
+    { id:'al_p2', userId:'u_p', type:'danger', icon:'⚡', title:'Electric bill due in 6 days', description:'$144 due. Pay from Chase Checking.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:14400 },
+    { id:'al_p3', userId:'u_p', type:'warning', icon:'📖', title:'Medium unused 42 days', description:'$5/mo with no reads. Cancel to save $60/yr.', timeAgo:'3 days ago', isRead:false, actionLabel:'Cancel →', amountCents:500 },
+  ],
+  cashflow: buildCashflow('u_p', 12400, 7600),
+  projection: { thirtyDay: 3200, sixtyDay: 6100, ninetyDay: 9400 },
+  trip: {
+    id:'trip_p1', userId:'u_p', name:'Product Summit NYC', destination:'SEA → New York',
+    startDate: fmt(addDays(today,12)), endDate: fmt(addDays(today,15)), nights:3, travelers:1,
+    budgetCents:200000, spentCents:98000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'✈️', label:'FLIGHTS', spentCents:54000, budgetCents:70000, fillColor:'#5b8dff' },
+      { icon:'🏨', label:'HOTEL', spentCents:44000, budgetCents:90000, fillColor:'#a78bfa' },
+      { icon:'🥗', label:'FOOD', spentCents:0, budgetCents:30000, fillColor:'#ffb347' },
+      { icon:'🚖', label:'TRANSPORT', spentCents:0, budgetCents:10000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,12)), event:'Depart SEA → JFK', icon:'✈️', amountCents:54000, isCovered:true },
+      { date: fmt(addDays(today,12)), event:'Ace Hotel Brooklyn check-in', icon:'🏨', amountCents:44000, isCovered:true },
+      { date: fmt(addDays(today,13)), event:'ProductCon NYC — Day 1', icon:'📱', amountCents:0, isCovered:true },
+      { date: fmt(addDays(today,15)), event:'Return JFK → SEA', icon:'✈️', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 17850000,
+  safeToSpendCents: 320000,
+  monthlyIncomeCents: 1240000,
+  monthlySpendCents: 760000,
+  subscriptionsTotalMonthlyCents: 5698,
+  subscriptionsWastedMonthlyCents: 500,
+  sparklineData: [0.55, 0.60, 0.64, 0.68, 0.72, 0.77],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Q — Quinn Quinn  |  College Student · Chime · Free
+// ═══════════════════════════════════════════════════════════════════════════════
+const Q: UserFinancialProfile = {
+  user: { id:'u_q', name:'Quinn Quinn', email:'quinn@example.com', avatarInitials:'QQ',
+    planTier:'free', bankName:'Chime', bankColor:'#00d4a1',
+    onboardedAt: fmt(subDays(today,14)), greeting:'Quinn' },
+  accounts: [
+    { id:'a_q1', userId:'u_q', name:'Chime Spending', type:'checking', institution:'Chime',
+      balanceCents:89000, color:'#00f5b0', logoAbbrev:'CHIM', updatedAt: fmt(today) },
+    { id:'a_q2', userId:'u_q', name:'Chime Savings', type:'savings', institution:'Chime',
+      balanceCents:0, color:'#5b8dff', logoAbbrev:'CHIM', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_q1', accountId:'a_q1', userId:'u_q', merchant:'Part-time Café Job', merchantIcon:'☕', amountCents:96000, isDebit:false, category:'Income', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_q2', accountId:'a_q1', userId:'u_q', merchant:'Rent (room share)', merchantIcon:'🏠', amountCents:64000, isDebit:true, category:'Rent', date: fmt(subDays(today,7)), isSubscription:false },
+    { id:'t_q3', accountId:'a_q1', userId:'u_q', merchant:'Campus Dining', merchantIcon:'🍕', amountCents:3200, isDebit:true, category:'Food', date: fmt(subDays(today,9)), isSubscription:false },
+    { id:'t_q4', accountId:'a_q1', userId:'u_q', merchant:'Spotify Student', merchantIcon:'🎵', amountCents:529, isDebit:true, category:'Entertainment', date: fmt(subDays(today,12)), isSubscription:true },
+    { id:'t_q5', accountId:'a_q1', userId:'u_q', merchant:'Amazon Prime Student', merchantIcon:'📦', amountCents:749, isDebit:true, category:'Shopping', date: fmt(subDays(today,15)), isSubscription:true },
+  ],
+  bills: [
+    { id:'b_q1', userId:'u_q', name:'Rent (room share)', icon:'🏠', amountCents:64000, dueDate: fmt(addDays(today,18)), source:'manual', status:'upcoming', accountId:'a_q1', color:'#ffb347' },
+    { id:'b_q2', userId:'u_q', name:'Phone Plan', icon:'📱', amountCents:3500, dueDate: fmt(addDays(today,6)), source:'email', status:'due_soon', accountId:'a_q1', color:'#5b8dff' },
+    { id:'b_q3', userId:'u_q', name:'Textbooks', icon:'📚', amountCents:18000, dueDate: fmt(addDays(today,14)), source:'manual', status:'upcoming', accountId:'a_q1', color:'#a78bfa' },
+  ],
+  subscriptions: [
+    { id:'s_q1', userId:'u_q', name:'Spotify Student', icon:'🎵', amountCents:529, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,12)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_q2', userId:'u_q', name:'Amazon Prime Student', icon:'📦', amountCents:749, billingCycle:'monthly', lastUsedDaysAgo:1, nextBillingDate: fmt(addDays(today,15)), category:'Shopping', isWaste:false, iconBg:'rgba(255,153,0,0.10)' },
+    { id:'s_q3', userId:'u_q', name:'Apple TV+', icon:'🍎', amountCents:999, billingCycle:'monthly', lastUsedDaysAgo:38, nextBillingDate: fmt(addDays(today,7)), category:'Entertainment', isWaste:true, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_q4', userId:'u_q', name:'Discord Nitro', icon:'🎮', amountCents:999, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,20)), category:'Gaming', isWaste:false, iconBg:'rgba(88,101,242,0.12)' },
+  ],
+  alerts: [
+    { id:'al_q1', userId:'u_q', type:'danger', icon:'📱', title:'Phone plan due in 6 days', description:'$35 due. Only $890 in Chime — keep an eye on your balance.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:3500 },
+    { id:'al_q2', userId:'u_q', type:'warning', icon:'🍎', title:'Apple TV+ unused 38 days', description:"$9.99/mo and nothing watched. Cancel and save $120/yr.", timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:999 },
+    { id:'al_q3', userId:'u_q', type:'info', icon:'☕', title:'Tip: start a $25/mo savings habit', description:"Even $25/mo in a HYSA grows to $1,500 in 5 years with interest. You've got this.", timeAgo:'This week', isRead:true, amountCents:0 },
+  ],
+  cashflow: buildCashflow('u_q', 3200, 2900),
+  projection: { thirtyDay: 300, sixtyDay: 580, ninetyDay: 840 },
+  trip: null,
+  netWorthCents: 890000,
+  safeToSpendCents: 34000,
+  monthlyIncomeCents: 320000,
+  monthlySpendCents: 290000,
+  subscriptionsTotalMonthlyCents: 3276,
+  subscriptionsWastedMonthlyCents: 999,
+  sparklineData: [0.08, 0.10, 0.09, 0.12, 0.11, 0.14],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// R — Ryan Reed  |  Real Estate Agent · Bank of America · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const R: UserFinancialProfile = {
+  user: { id:'u_r', name:'Ryan Reed', email:'ryan@example.com', avatarInitials:'RR',
+    planTier:'premium', bankName:'Bank of America', bankColor:'#c0392b',
+    onboardedAt: fmt(subDays(today,150)), greeting:'Ryan' },
+  accounts: [
+    { id:'a_r1', userId:'u_r', name:'BoA Checking', type:'checking', institution:'Bank of America',
+      balanceCents:420000, color:'#00f5b0', logoAbbrev:'BOFA', updatedAt: fmt(today) },
+    { id:'a_r2', userId:'u_r', name:'BoA Savings', type:'savings', institution:'Bank of America',
+      balanceCents:1800000, interestRate:4.6, color:'#5b8dff', logoAbbrev:'BOFA', updatedAt: fmt(today) },
+    { id:'a_r3', userId:'u_r', name:'BoA Premium Rewards', type:'credit', institution:'Bank of America',
+      balanceCents:-96000, dueDate: fmt(addDays(today,13)), color:'#ffb347', logoAbbrev:'BOFA', updatedAt: fmt(today) },
+    { id:'a_r4', userId:'u_r', name:'Vanguard IRA', type:'investment', institution:'Vanguard',
+      balanceCents:3200000, interestRate:8.4, color:'#a78bfa', logoAbbrev:'VANG', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_r1', accountId:'a_r1', userId:'u_r', merchant:'RE Commission — 123 Oak St', merchantIcon:'🏡', amountCents:2400000, isDebit:false, category:'Income', date: fmt(subDays(today,3)), isSubscription:false },
+    { id:'t_r2', accountId:'a_r1', userId:'u_r', merchant:'Mortgage', merchantIcon:'🏠', amountCents:284000, isDebit:true, category:'Rent', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_r3', accountId:'a_r3', userId:'u_r', merchant:'Zillow Premier Agent', merchantIcon:'🏡', amountCents:59900, isDebit:true, category:'Business', date: fmt(subDays(today,8)), isSubscription:true },
+    { id:'t_r4', accountId:'a_r3', userId:'u_r', merchant:'DocuSign', merchantIcon:'✍️', amountCents:4500, isDebit:true, category:'Business', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_r5', accountId:'a_r1', userId:'u_r', merchant:'Home Depot', merchantIcon:'🔨', amountCents:28000, isDebit:true, category:'Shopping', date: fmt(subDays(today,14)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_r1', userId:'u_r', name:'Mortgage', icon:'🏠', amountCents:284000, dueDate: fmt(addDays(today,22)), source:'manual', status:'upcoming', accountId:'a_r1', color:'#ffb347' },
+    { id:'b_r2', userId:'u_r', name:'BoA Credit Card', icon:'💳', amountCents:96000, dueDate: fmt(addDays(today,13)), source:'email', status:'upcoming', accountId:'a_r1', color:'#ff5252' },
+    { id:'b_r3', userId:'u_r', name:'MLS Dues', icon:'🏡', amountCents:24000, dueDate: fmt(addDays(today,7)), source:'email', status:'due_soon', accountId:'a_r1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_r1', userId:'u_r', name:'Zillow Premier Agent', icon:'🏡', amountCents:59900, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,8)), category:'Business', isWaste:false, iconBg:'rgba(0,106,255,0.12)' },
+    { id:'s_r2', userId:'u_r', name:'DocuSign', icon:'✍️', amountCents:4500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,10)), category:'Business', isWaste:false, iconBg:'rgba(255,180,0,0.12)' },
+    { id:'s_r3', userId:'u_r', name:'Google Workspace', icon:'📧', amountCents:1400, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,20)), category:'Business', isWaste:false, iconBg:'rgba(66,133,244,0.12)' },
+    { id:'s_r4', userId:'u_r', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_r5', userId:'u_r', name:'BombBomb Video', icon:'🎥', amountCents:3900, billingCycle:'monthly', lastUsedDaysAgo:48, nextBillingDate: fmt(addDays(today,5)), category:'Business', isWaste:true, iconBg:'rgba(255,100,50,0.12)' },
+  ],
+  alerts: [
+    { id:'al_r1', userId:'u_r', type:'success', icon:'🏡', title:'Commission deposited: $24,000', description:'123 Oak St closed. After broker split: $24K. Great month, Ryan!', timeAgo:'3 days ago', isRead:false, amountCents:2400000 },
+    { id:'al_r2', userId:'u_r', type:'danger', icon:'🏡', title:'MLS dues due in 7 days', description:'$240 annual dues due. Pay from BoA Checking.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:24000 },
+    { id:'al_r3', userId:'u_r', type:'warning', icon:'🎥', title:'BombBomb unused 48 days', description:'$39/mo video tool with no sends. Cancel to save $468/yr.', timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:3900 },
+  ],
+  cashflow: buildCashflow('u_r', 9400, 6200),
+  projection: { thirtyDay: 1980, sixtyDay: 3800, ninetyDay: 5600 },
+  trip: null,
+  netWorthCents: 8870000,
+  safeToSpendCents: 198000,
+  monthlyIncomeCents: 940000,
+  monthlySpendCents: 620000,
+  subscriptionsTotalMonthlyCents: 70799,
+  subscriptionsWastedMonthlyCents: 3900,
+  sparklineData: [0.38, 0.43, 0.47, 0.51, 0.55, 0.60],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// S — Sara Singh  |  Social Worker · TD Bank · Free
+// ═══════════════════════════════════════════════════════════════════════════════
+const S: UserFinancialProfile = {
+  user: { id:'u_s', name:'Sara Singh', email:'sara@example.com', avatarInitials:'SS',
+    planTier:'free', bankName:'TD Bank', bankColor:'#1a9c3e',
+    onboardedAt: fmt(subDays(today,75)), greeting:'Sara' },
+  accounts: [
+    { id:'a_s1', userId:'u_s', name:'TD Checking', type:'checking', institution:'TD Bank',
+      balanceCents:184000, color:'#00f5b0', logoAbbrev:'TDBN', updatedAt: fmt(today) },
+    { id:'a_s2', userId:'u_s', name:'TD Savings', type:'savings', institution:'TD Bank',
+      balanceCents:480000, interestRate:3.8, color:'#5b8dff', logoAbbrev:'TDBN', updatedAt: fmt(today) },
+    { id:'a_s3', userId:'u_s', name:'TD Visa', type:'credit', institution:'TD Bank',
+      balanceCents:-52000, dueDate: fmt(addDays(today,9)), color:'#ffb347', logoAbbrev:'TDBN', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_s1', accountId:'a_s1', userId:'u_s', merchant:'City Agency Payroll', merchantIcon:'💵', amountCents:420000, isDebit:false, category:'Income', date: fmt(subDays(today,4)), isSubscription:false },
+    { id:'t_s2', accountId:'a_s1', userId:'u_s', merchant:'Rent', merchantIcon:'🏠', amountCents:168000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_s3', accountId:'a_s1', userId:'u_s', merchant:'Aldi', merchantIcon:'🛒', amountCents:7200, isDebit:true, category:'Food', date: fmt(subDays(today,8)), isSubscription:false },
+    { id:'t_s4', accountId:'a_s3', userId:'u_s', merchant:'Headspace', merchantIcon:'🧘', amountCents:1299, isDebit:true, category:'Health', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_s5', accountId:'a_s1', userId:'u_s', merchant:'Target', merchantIcon:'🎯', amountCents:6800, isDebit:true, category:'Shopping', date: fmt(subDays(today,14)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_s1', userId:'u_s', name:'Rent', icon:'🏠', amountCents:168000, dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:'a_s1', color:'#ffb347' },
+    { id:'b_s2', userId:'u_s', name:'TD Visa', icon:'💳', amountCents:52000, dueDate: fmt(addDays(today,9)), source:'email', status:'due_soon', accountId:'a_s1', color:'#ff5252' },
+    { id:'b_s3', userId:'u_s', name:'Electric', icon:'⚡', amountCents:9600, dueDate: fmt(addDays(today,15)), source:'email', status:'upcoming', accountId:'a_s1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_s1', userId:'u_s', name:'Netflix', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:4, nextBillingDate: fmt(addDays(today,10)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_s2', userId:'u_s', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,16)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_s3', userId:'u_s', name:'Headspace', icon:'🧘', amountCents:1299, billingCycle:'monthly', lastUsedDaysAgo:35, nextBillingDate: fmt(addDays(today,10)), category:'Health', isWaste:true, iconBg:'rgba(255,109,40,0.10)' },
+    { id:'s_s4', userId:'u_s', name:'Amazon Prime', icon:'📦', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:3, nextBillingDate: fmt(addDays(today,22)), category:'Shopping', isWaste:false, iconBg:'rgba(255,153,0,0.10)' },
+  ],
+  alerts: [
+    { id:'al_s1', userId:'u_s', type:'success', icon:'💎', title:'Emergency fund growing', description:"$4,800 saved — that's 1.7 months of expenses. Keep going, you're on track!", timeAgo:'This week', isRead:false, amountCents:480000 },
+    { id:'al_s2', userId:'u_s', type:'danger', icon:'💳', title:'TD Visa due in 9 days', description:'$520 due. Pay from TD Checking (bal: $1,840).', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:52000 },
+    { id:'al_s3', userId:'u_s', type:'warning', icon:'🧘', title:'Headspace unused 35 days', description:'$12.99/mo. No sessions in over a month. Cancel to save $156/yr.', timeAgo:'2 days ago', isRead:false, actionLabel:'Cancel →', amountCents:1299 },
+  ],
+  cashflow: buildCashflow('u_s', 4200, 3600),
+  projection: { thirtyDay: 840, sixtyDay: 1600, ninetyDay: 2380 },
+  trip: null,
+  netWorthCents: 3120000,
+  safeToSpendCents: 84000,
+  monthlyIncomeCents: 420000,
+  monthlySpendCents: 360000,
+  subscriptionsTotalMonthlyCents: 5696,
+  subscriptionsWastedMonthlyCents: 1299,
+  sparklineData: [0.20, 0.24, 0.27, 0.30, 0.33, 0.36],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// T — Tyler Torres  |  Crypto Day Trader · Coinbase · Free
+// ═══════════════════════════════════════════════════════════════════════════════
+const T: UserFinancialProfile = {
+  user: { id:'u_t', name:'Tyler Torres', email:'tyler@example.com', avatarInitials:'TT',
+    planTier:'free', bankName:'Coinbase', bankColor:'#0052ff',
+    onboardedAt: fmt(subDays(today,60)), greeting:'Tyler' },
+  accounts: [
+    { id:'a_t1', userId:'u_t', name:'Chase Checking', type:'checking', institution:'Chase',
+      balanceCents:260000, color:'#00f5b0', logoAbbrev:'CHASE', updatedAt: fmt(today) },
+    { id:'a_t2', userId:'u_t', name:'Coinbase USDC', type:'savings', institution:'Coinbase',
+      balanceCents:840000, interestRate:4.0, color:'#5b8dff', logoAbbrev:'COIN', updatedAt: fmt(today) },
+    { id:'a_t3', userId:'u_t', name:'Chase Credit', type:'credit', institution:'Chase',
+      balanceCents:-42000, dueDate: fmt(addDays(today,11)), color:'#ffb347', logoAbbrev:'CHASE', updatedAt: fmt(today) },
+    { id:'a_t4', userId:'u_t', name:'Coinbase Portfolio', type:'investment', institution:'Coinbase',
+      balanceCents:1800000, interestRate:0, color:'#a78bfa', logoAbbrev:'COIN', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_t1', accountId:'a_t2', userId:'u_t', merchant:'BTC Trade Gain', merchantIcon:'₿', amountCents:480000, isDebit:false, category:'Income', date: fmt(subDays(today,2)), isSubscription:false },
+    { id:'t_t2', accountId:'a_t1', userId:'u_t', merchant:'Rent', merchantIcon:'🏠', amountCents:232000, isDebit:true, category:'Rent', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_t3', accountId:'a_t3', userId:'u_t', merchant:'TradingView Pro', merchantIcon:'📈', amountCents:5900, isDebit:true, category:'Business', date: fmt(subDays(today,7)), isSubscription:true },
+    { id:'t_t4', accountId:'a_t1', userId:'u_t', merchant:"McDonald's", merchantIcon:'🍟', amountCents:1400, isDebit:true, category:'Food', date: fmt(subDays(today,9)), isSubscription:false },
+    { id:'t_t5', accountId:'a_t3', userId:'u_t', merchant:'ETH Gas Fees', merchantIcon:'⛽', amountCents:2800, isDebit:true, category:'Transport', date: fmt(subDays(today,12)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_t1', userId:'u_t', name:'Rent', icon:'🏠', amountCents:232000, dueDate: fmt(addDays(today,21)), source:'manual', status:'upcoming', accountId:'a_t1', color:'#ffb347' },
+    { id:'b_t2', userId:'u_t', name:'Chase Credit', icon:'💳', amountCents:42000, dueDate: fmt(addDays(today,11)), source:'email', status:'upcoming', accountId:'a_t1', color:'#ff5252' },
+    { id:'b_t3', userId:'u_t', name:'Internet', icon:'📡', amountCents:7900, dueDate: fmt(addDays(today,8)), source:'email', status:'due_soon', accountId:'a_t1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_t1', userId:'u_t', name:'TradingView Pro', icon:'📈', amountCents:5900, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,7)), category:'Finance', isWaste:false, iconBg:'rgba(0,120,255,0.12)' },
+    { id:'s_t2', userId:'u_t', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,14)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_t3', userId:'u_t', name:'Netflix', icon:'📺', amountCents:1799, billingCycle:'monthly', lastUsedDaysAgo:10, nextBillingDate: fmt(addDays(today,20)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_t4', userId:'u_t', name:'Coinbase One', icon:'₿', amountCents:2999, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Finance', isWaste:false, iconBg:'rgba(0,82,255,0.12)' },
+  ],
+  alerts: [
+    { id:'al_t1', userId:'u_t', type:'success', icon:'₿', title:'BTC trade gain: $4,800', description:'BTC position +18% this week. Realized $4,800. Consider stablecoin reserve?', timeAgo:'2 days ago', isRead:false, amountCents:480000 },
+    { id:'al_t2', userId:'u_t', type:'warning', icon:'⚠️', title:'High spending month', description:"You've spent $580 on food delivery this month — 40% over your usual $420.", timeAgo:'Yesterday', isRead:false, amountCents:58000 },
+    { id:'al_t3', userId:'u_t', type:'danger', icon:'📡', title:'Internet due in 8 days', description:'$79 due. Pay from Chase Checking (bal: $2,600).', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:7900 },
+  ],
+  cashflow: buildCashflow('u_t', 5800, 4400),
+  projection: { thirtyDay: 1240, sixtyDay: 2380, ninetyDay: 3640 },
+  trip: null,
+  netWorthCents: 6480000,
+  safeToSpendCents: 124000,
+  monthlyIncomeCents: 580000,
+  monthlySpendCents: 440000,
+  subscriptionsTotalMonthlyCents: 11797,
+  subscriptionsWastedMonthlyCents: 0,
+  sparklineData: [0.32, 0.40, 0.35, 0.48, 0.42, 0.55],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// U — Uma Upton  |  UX Designer · Fidelity · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const U: UserFinancialProfile = {
+  user: { id:'u_u', name:'Uma Upton', email:'uma@example.com', avatarInitials:'UU',
+    planTier:'premium', bankName:'Fidelity', bankColor:'#006633',
+    onboardedAt: fmt(subDays(today,180)), greeting:'Uma' },
+  accounts: [
+    { id:'a_u1', userId:'u_u', name:'Fidelity Checking', type:'checking', institution:'Fidelity',
+      balanceCents:840000, color:'#00f5b0', logoAbbrev:'FIDL', updatedAt: fmt(today) },
+    { id:'a_u2', userId:'u_u', name:'Fidelity HYSA', type:'savings', institution:'Fidelity',
+      balanceCents:4800000, interestRate:5.1, color:'#5b8dff', logoAbbrev:'FIDL', updatedAt: fmt(today) },
+    { id:'a_u3', userId:'u_u', name:'Fidelity 401(k)', type:'investment', institution:'Fidelity',
+      balanceCents:24000000, interestRate:9.6, color:'#a78bfa', logoAbbrev:'FIDL', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_u1', accountId:'a_u1', userId:'u_u', merchant:'DesignAgency Co Payroll', merchantIcon:'💵', amountCents:1480000, isDebit:false, category:'Income', date: fmt(subDays(today,4)), isSubscription:false },
+    { id:'t_u2', accountId:'a_u1', userId:'u_u', merchant:'Rent', merchantIcon:'🏠', amountCents:328000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_u3', accountId:'a_u1', userId:'u_u', merchant:'Adobe Creative Cloud', merchantIcon:'🎨', amountCents:5999, isDebit:true, category:'Business', date: fmt(subDays(today,8)), isSubscription:true },
+    { id:'t_u4', accountId:'a_u1', userId:'u_u', merchant:'Figma', merchantIcon:'✏️', amountCents:4500, isDebit:true, category:'Business', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_u5', accountId:'a_u1', userId:'u_u', merchant:'Sweetgreen', merchantIcon:'🥗', amountCents:1600, isDebit:true, category:'Food', date: fmt(subDays(today,12)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_u1', userId:'u_u', name:'Rent', icon:'🏠', amountCents:328000, dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:'a_u1', color:'#ffb347' },
+    { id:'b_u2', userId:'u_u', name:'Electric', icon:'⚡', amountCents:11200, dueDate: fmt(addDays(today,7)), source:'email', status:'due_soon', accountId:'a_u1', color:'#5b8dff' },
+    { id:'b_u3', userId:'u_u', name:'Renter\'s Insurance', icon:'🔒', amountCents:4800, dueDate: fmt(addDays(today,14)), source:'email', status:'upcoming', accountId:'a_u1', color:'#a78bfa' },
+  ],
+  subscriptions: [
+    { id:'s_u1', userId:'u_u', name:'Adobe Creative Cloud', icon:'🎨', amountCents:5999, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,8)), category:'Design', isWaste:false, iconBg:'rgba(255,50,50,0.12)' },
+    { id:'s_u2', userId:'u_u', name:'Figma', icon:'✏️', amountCents:4500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,10)), category:'Design', isWaste:false, iconBg:'rgba(162,89,255,0.12)' },
+    { id:'s_u3', userId:'u_u', name:'Loom', icon:'📹', amountCents:1500, billingCycle:'monthly', lastUsedDaysAgo:40, nextBillingDate: fmt(addDays(today,15)), category:'Productivity', isWaste:true, iconBg:'rgba(100,80,200,0.12)' },
+    { id:'s_u4', userId:'u_u', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_u5', userId:'u_u', name:'Apple One Premier', icon:'🍎', amountCents:3299, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,22)), category:'Entertainment', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+  ],
+  alerts: [
+    { id:'al_u1', userId:'u_u', type:'success', icon:'📈', title:'401(k) quarterly gain: +$18,400', description:'Fidelity 401(k) up 9.6% this quarter. Consider increasing contribution?', timeAgo:'This week', isRead:false, amountCents:1840000 },
+    { id:'al_u2', userId:'u_u', type:'warning', icon:'📹', title:'Loom unused 40 days', description:'$15/mo, no recordings. Switch to free plan and save $180/yr.', timeAgo:'Yesterday', isRead:false, actionLabel:'Downgrade →', amountCents:1500 },
+    { id:'al_u3', userId:'u_u', type:'danger', icon:'⚡', title:'Electric due in 7 days', description:'$112 due. Pay from Fidelity Checking (bal: $8,400).', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:11200 },
+  ],
+  cashflow: buildCashflow('u_u', 14800, 8200),
+  projection: { thirtyDay: 4200, sixtyDay: 8100, ninetyDay: 12600 },
+  trip: {
+    id:'trip_u1', userId:'u_u', name:'Design Conference PDX', destination:'SFO → Portland',
+    startDate: fmt(addDays(today,18)), endDate: fmt(addDays(today,21)), nights:3, travelers:1,
+    budgetCents:160000, spentCents:72000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'✈️', label:'FLIGHTS', spentCents:42000, budgetCents:60000, fillColor:'#5b8dff' },
+      { icon:'🏨', label:'HOTEL', spentCents:30000, budgetCents:60000, fillColor:'#a78bfa' },
+      { icon:'🥗', label:'FOOD', spentCents:0, budgetCents:30000, fillColor:'#ffb347' },
+      { icon:'🎨', label:'WORKSHOPS', spentCents:0, budgetCents:10000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,18)), event:'Depart SFO → PDX', icon:'✈️', amountCents:42000, isCovered:true },
+      { date: fmt(addDays(today,18)), event:'Ace Hotel Portland check-in', icon:'🏨', amountCents:30000, isCovered:true },
+      { date: fmt(addDays(today,19)), event:'Figma Config 2026 — Day 1', icon:'✏️', amountCents:0, isCovered:true },
+      { date: fmt(addDays(today,21)), event:'Return PDX → SFO', icon:'✈️', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 31210000,
+  safeToSpendCents: 420000,
+  monthlyIncomeCents: 1480000,
+  monthlySpendCents: 820000,
+  subscriptionsTotalMonthlyCents: 16397,
+  subscriptionsWastedMonthlyCents: 1500,
+  sparklineData: [0.60, 0.64, 0.68, 0.71, 0.75, 0.80],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// V — Vince Vega  |  Freelance Videographer · Wells Fargo · Free
+// ═══════════════════════════════════════════════════════════════════════════════
+const V: UserFinancialProfile = {
+  user: { id:'u_v', name:'Vince Vega', email:'vince@example.com', avatarInitials:'VV',
+    planTier:'free', bankName:'Wells Fargo', bankColor:'#c0392b',
+    onboardedAt: fmt(subDays(today,90)), greeting:'Vince' },
+  accounts: [
+    { id:'a_v1', userId:'u_v', name:'Wells Fargo Checking', type:'checking', institution:'Wells Fargo',
+      balanceCents:380000, color:'#00f5b0', logoAbbrev:'WFGO', updatedAt: fmt(today) },
+    { id:'a_v2', userId:'u_v', name:'Wells Fargo Savings', type:'savings', institution:'Wells Fargo',
+      balanceCents:1200000, interestRate:3.5, color:'#5b8dff', logoAbbrev:'WFGO', updatedAt: fmt(today) },
+    { id:'a_v3', userId:'u_v', name:'Wells Fargo Visa', type:'credit', institution:'Wells Fargo',
+      balanceCents:-240000, dueDate: fmt(addDays(today,12)), color:'#ffb347', logoAbbrev:'WFGO', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_v1', accountId:'a_v1', userId:'u_v', merchant:'Freelance Invoice — TechCo', merchantIcon:'🎬', amountCents:600000, isDebit:false, category:'Income', date: fmt(subDays(today,3)), isSubscription:false },
+    { id:'t_v2', accountId:'a_v1', userId:'u_v', merchant:'Rent', merchantIcon:'🏠', amountCents:328000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_v3', accountId:'a_v3', userId:'u_v', merchant:'Adobe Premiere Pro', merchantIcon:'🎬', amountCents:5499, isDebit:true, category:'Business', date: fmt(subDays(today,8)), isSubscription:true },
+    { id:'t_v4', accountId:'a_v3', userId:'u_v', merchant:'Dropbox Business', merchantIcon:'💾', amountCents:1699, isDebit:true, category:'Business', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_v5', accountId:'a_v1', userId:'u_v', merchant:'B&H Photo', merchantIcon:'📷', amountCents:84000, isDebit:true, category:'Shopping', date: fmt(subDays(today,14)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_v1', userId:'u_v', name:'Rent', icon:'🏠', amountCents:328000, dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:'a_v1', color:'#ffb347' },
+    { id:'b_v2', userId:'u_v', name:'Wells Fargo Visa', icon:'💳', amountCents:240000, dueDate: fmt(addDays(today,12)), source:'email', status:'upcoming', accountId:'a_v1', color:'#ff5252' },
+    { id:'b_v3', userId:'u_v', name:'Storage Unit', icon:'📦', amountCents:18000, dueDate: fmt(addDays(today,6)), source:'manual', status:'due_soon', accountId:'a_v1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_v1', userId:'u_v', name:'Adobe Premiere Pro', icon:'🎬', amountCents:5499, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,8)), category:'Business', isWaste:false, iconBg:'rgba(120,50,200,0.12)' },
+    { id:'s_v2', userId:'u_v', name:'Frame.io', icon:'🎞️', amountCents:4500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,12)), category:'Business', isWaste:false, iconBg:'rgba(0,150,255,0.12)' },
+    { id:'s_v3', userId:'u_v', name:'Dropbox Business', icon:'💾', amountCents:1699, billingCycle:'monthly', lastUsedDaysAgo:34, nextBillingDate: fmt(addDays(today,10)), category:'Business', isWaste:true, iconBg:'rgba(0,100,200,0.10)' },
+    { id:'s_v4', userId:'u_v', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+  ],
+  alerts: [
+    { id:'al_v1', userId:'u_v', type:'success', icon:'🎬', title:'Invoice paid: $6,000', description:'TechCo video project paid. After expenses, net $5,200. Nice month!', timeAgo:'3 days ago', isRead:false, amountCents:600000 },
+    { id:'al_v2', userId:'u_v', type:'warning', icon:'💾', title:'Dropbox unused 34 days', description:"$16.99/mo. You're using OneDrive now — cancel Dropbox to save $204/yr.", timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:1699 },
+    { id:'al_v3', userId:'u_v', type:'danger', icon:'📦', title:'Storage unit due in 6 days', description:'$180 due. Pay from Wells Fargo Checking.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:18000 },
+  ],
+  cashflow: buildCashflow('u_v', 8200, 6800),
+  projection: { thirtyDay: 1640, sixtyDay: 3100, ninetyDay: 4700 },
+  trip: null,
+  netWorthCents: 7640000,
+  safeToSpendCents: 164000,
+  monthlyIncomeCents: 820000,
+  monthlySpendCents: 680000,
+  subscriptionsTotalMonthlyCents: 12797,
+  subscriptionsWastedMonthlyCents: 1699,
+  sparklineData: [0.38, 0.40, 0.42, 0.44, 0.46, 0.50],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// W — Wendy Walsh  |  Wealth Manager · Vanguard · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const W: UserFinancialProfile = {
+  user: { id:'u_w', name:'Wendy Walsh', email:'wendy@example.com', avatarInitials:'WW',
+    planTier:'premium', bankName:'Vanguard', bankColor:'#722f37',
+    onboardedAt: fmt(subDays(today,365)), greeting:'Wendy' },
+  accounts: [
+    { id:'a_w1', userId:'u_w', name:'Vanguard Checking', type:'checking', institution:'Vanguard',
+      balanceCents:1800000, color:'#00f5b0', logoAbbrev:'VANG', updatedAt: fmt(today) },
+    { id:'a_w2', userId:'u_w', name:'Vanguard Money Mkt', type:'savings', institution:'Vanguard',
+      balanceCents:8400000, interestRate:5.3, color:'#5b8dff', logoAbbrev:'VANG', updatedAt: fmt(today) },
+    { id:'a_w3', userId:'u_w', name:'Vanguard Brokerage', type:'investment', institution:'Vanguard',
+      balanceCents:38000000, interestRate:12.1, color:'#a78bfa', logoAbbrev:'VANG', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_w1', accountId:'a_w1', userId:'u_w', merchant:'WM Advisors Payroll', merchantIcon:'💵', amountCents:2200000, isDebit:false, category:'Income', date: fmt(subDays(today,4)), isSubscription:false },
+    { id:'t_w2', accountId:'a_w1', userId:'u_w', merchant:'Mortgage', merchantIcon:'🏠', amountCents:480000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_w3', accountId:'a_w1', userId:'u_w', merchant:'Bloomberg Terminal', merchantIcon:'📊', amountCents:34500, isDebit:true, category:'Business', date: fmt(subDays(today,8)), isSubscription:true },
+    { id:'t_w4', accountId:'a_w1', userId:'u_w', merchant:'Peloton', merchantIcon:'🚴', amountCents:4400, isDebit:true, category:'Health', date: fmt(subDays(today,10)), isSubscription:true },
+    { id:'t_w5', accountId:'a_w1', userId:'u_w', merchant:'Whole Foods', merchantIcon:'🛒', amountCents:28400, isDebit:true, category:'Food', date: fmt(subDays(today,13)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_w1', userId:'u_w', name:'Mortgage', icon:'🏠', amountCents:480000, dueDate: fmt(addDays(today,22)), source:'manual', status:'upcoming', accountId:'a_w1', color:'#ffb347' },
+    { id:'b_w2', userId:'u_w', name:'HOA', icon:'🏡', amountCents:62000, dueDate: fmt(addDays(today,7)), source:'manual', status:'due_soon', accountId:'a_w1', color:'#5b8dff' },
+    { id:'b_w3', userId:'u_w', name:'Electric & Gas', icon:'⚡', amountCents:22000, dueDate: fmt(addDays(today,14)), source:'email', status:'upcoming', accountId:'a_w1', color:'#a78bfa' },
+  ],
+  subscriptions: [
+    { id:'s_w1', userId:'u_w', name:'Bloomberg Terminal', icon:'📊', amountCents:34500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,8)), category:'Business', isWaste:false, iconBg:'rgba(0,100,180,0.12)' },
+    { id:'s_w2', userId:'u_w', name:'LinkedIn Premium', icon:'💼', amountCents:3999, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,15)), category:'Business', isWaste:false, iconBg:'rgba(0,119,181,0.12)' },
+    { id:'s_w3', userId:'u_w', name:'Calm', icon:'🧘', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Health', isWaste:false, iconBg:'rgba(100,150,255,0.10)' },
+    { id:'s_w4', userId:'u_w', name:'Peloton', icon:'🚴', amountCents:4400, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,10)), category:'Health', isWaste:false, iconBg:'rgba(255,100,50,0.12)' },
+    { id:'s_w5', userId:'u_w', name:'Morning Brew Pro', icon:'☕', amountCents:2900, billingCycle:'monthly', lastUsedDaysAgo:31, nextBillingDate: fmt(addDays(today,5)), category:'News', isWaste:true, iconBg:'rgba(200,140,50,0.12)' },
+  ],
+  alerts: [
+    { id:'al_w1', userId:'u_w', type:'success', icon:'📈', title:'Portfolio: $380K milestone', description:'Vanguard Brokerage crossed $380K. Up 12.1% YTD — ahead of benchmark by 2.3%.', timeAgo:'Today', isRead:false, amountCents:38000000 },
+    { id:'al_w2', userId:'u_w', type:'warning', icon:'☕', title:'Morning Brew Pro unused 31 days', description:'$29/mo. No newsletter opens this month. Cancel to save $348/yr.', timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:2900 },
+    { id:'al_w3', userId:'u_w', type:'danger', icon:'🏡', title:'HOA fees due in 7 days', description:'$620 HOA due. Schedule from Vanguard Checking.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:62000 },
+  ],
+  cashflow: buildCashflow('u_w', 22000, 9800),
+  projection: { thirtyDay: 8400, sixtyDay: 16200, ninetyDay: 25000 },
+  trip: {
+    id:'trip_w1', userId:'u_w', name:'Napa Client Retreat', destination:'SFO → Napa Valley',
+    startDate: fmt(addDays(today,14)), endDate: fmt(addDays(today,17)), nights:3, travelers:2,
+    budgetCents:480000, spentCents:240000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'🚗', label:'TRANSPORT', spentCents:84000, budgetCents:100000, fillColor:'#5b8dff' },
+      { icon:'🏨', label:'RESORT', spentCents:156000, budgetCents:200000, fillColor:'#a78bfa' },
+      { icon:'🍷', label:'DINING', spentCents:0, budgetCents:120000, fillColor:'#ffb347' },
+      { icon:'🎯', label:'ACTIVITIES', spentCents:0, budgetCents:60000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,14)), event:'Drive to Meadowood Napa Valley', icon:'🚗', amountCents:84000, isCovered:true },
+      { date: fmt(addDays(today,14)), event:'Meadowood Resort check-in', icon:'🏨', amountCents:156000, isCovered:true },
+      { date: fmt(addDays(today,15)), event:'Client portfolio review dinner', icon:'🍷', amountCents:0, isCovered:false },
+      { date: fmt(addDays(today,17)), event:'Return to SF', icon:'🚗', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 52360000,
+  safeToSpendCents: 840000,
+  monthlyIncomeCents: 2200000,
+  monthlySpendCents: 980000,
+  subscriptionsTotalMonthlyCents: 47298,
+  subscriptionsWastedMonthlyCents: 2900,
+  sparklineData: [0.75, 0.78, 0.80, 0.83, 0.86, 0.90],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// X — Xander Xu  |  VP of Finance · Interactive Brokers · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const X: UserFinancialProfile = {
+  user: { id:'u_x', name:'Xander Xu', email:'xander@example.com', avatarInitials:'XX',
+    planTier:'premium', bankName:'Interactive Brokers', bankColor:'#ff6600',
+    onboardedAt: fmt(subDays(today,240)), greeting:'Xander' },
+  accounts: [
+    { id:'a_x1', userId:'u_x', name:'IBKR Checking', type:'checking', institution:'Interactive Brokers',
+      balanceCents:2400000, color:'#00f5b0', logoAbbrev:'IBKR', updatedAt: fmt(today) },
+    { id:'a_x2', userId:'u_x', name:'IBKR Cash Mgmt', type:'savings', institution:'Interactive Brokers',
+      balanceCents:6400000, interestRate:5.1, color:'#5b8dff', logoAbbrev:'IBKR', updatedAt: fmt(today) },
+    { id:'a_x3', userId:'u_x', name:'IBKR Portfolio', type:'investment', institution:'Interactive Brokers',
+      balanceCents:28000000, interestRate:14.2, color:'#a78bfa', logoAbbrev:'IBKR', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_x1', accountId:'a_x1', userId:'u_x', merchant:'FinanceCorp Payroll', merchantIcon:'💵', amountCents:2800000, isDebit:false, category:'Income', date: fmt(subDays(today,4)), isSubscription:false },
+    { id:'t_x2', accountId:'a_x1', userId:'u_x', merchant:'Mortgage', merchantIcon:'🏠', amountCents:580000, isDebit:true, category:'Rent', date: fmt(subDays(today,6)), isSubscription:false },
+    { id:'t_x3', accountId:'a_x1', userId:'u_x', merchant:'Bloomberg Terminal', merchantIcon:'📊', amountCents:34500, isDebit:true, category:'Business', date: fmt(subDays(today,8)), isSubscription:true },
+    { id:'t_x4', accountId:'a_x1', userId:'u_x', merchant:'Ruth\'s Chris Steakhouse', merchantIcon:'🥩', amountCents:62000, isDebit:true, category:'Food', date: fmt(subDays(today,10)), isSubscription:false },
+    { id:'t_x5', accountId:'a_x1', userId:'u_x', merchant:'Seeking Alpha Pro', merchantIcon:'📉', amountCents:3400, isDebit:true, category:'Finance', date: fmt(subDays(today,14)), isSubscription:true },
+  ],
+  bills: [
+    { id:'b_x1', userId:'u_x', name:'Mortgage', icon:'🏠', amountCents:580000, dueDate: fmt(addDays(today,22)), source:'manual', status:'upcoming', accountId:'a_x1', color:'#ffb347' },
+    { id:'b_x2', userId:'u_x', name:'HOA', icon:'🏡', amountCents:84000, dueDate: fmt(addDays(today,9)), source:'manual', status:'due_soon', accountId:'a_x1', color:'#5b8dff' },
+    { id:'b_x3', userId:'u_x', name:'Property Tax (Q2)', icon:'🏛️', amountCents:480000, dueDate: fmt(addDays(today,30)), source:'email', status:'upcoming', accountId:'a_x1', color:'#a78bfa' },
+  ],
+  subscriptions: [
+    { id:'s_x1', userId:'u_x', name:'Bloomberg Terminal', icon:'📊', amountCents:34500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,8)), category:'Finance', isWaste:false, iconBg:'rgba(0,100,180,0.12)' },
+    { id:'s_x2', userId:'u_x', name:'WSJ Digital', icon:'📰', amountCents:3899, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,14)), category:'News', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_x3', userId:'u_x', name:'LinkedIn Premium', icon:'💼', amountCents:3999, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,20)), category:'Business', isWaste:false, iconBg:'rgba(0,119,181,0.12)' },
+    { id:'s_x4', userId:'u_x', name:'Netflix 4K', icon:'📺', amountCents:2299, billingCycle:'monthly', lastUsedDaysAgo:3, nextBillingDate: fmt(addDays(today,18)), category:'Entertainment', isWaste:false, iconBg:'rgba(229,9,20,0.12)' },
+    { id:'s_x5', userId:'u_x', name:'Seeking Alpha Pro', icon:'📉', amountCents:3400, billingCycle:'monthly', lastUsedDaysAgo:36, nextBillingDate: fmt(addDays(today,14)), category:'Finance', isWaste:true, iconBg:'rgba(255,150,0,0.10)' },
+  ],
+  alerts: [
+    { id:'al_x1', userId:'u_x', type:'success', icon:'📈', title:'Portfolio: $280K YTD gain', description:'IBKR portfolio up 14.2% this year. Options strategy is outperforming index by 2.1%.', timeAgo:'Today', isRead:false, amountCents:28000000 },
+    { id:'al_x2', userId:'u_x', type:'warning', icon:'📉', title:'Seeking Alpha unused 36 days', description:'$34/mo with no reads. Cancel to save $408/yr.', timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:3400 },
+    { id:'al_x3', userId:'u_x', type:'danger', icon:'🏡', title:'HOA due in 9 days', description:'$840 HOA due. Pay from IBKR Checking (bal: $24,000).', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:84000 },
+  ],
+  cashflow: buildCashflow('u_x', 28000, 12000),
+  projection: { thirtyDay: 10800, sixtyDay: 20800, ninetyDay: 31200 },
+  trip: {
+    id:'trip_x1', userId:'u_x', name:'Singapore Investor Roadshow', destination:'JFK → Singapore',
+    startDate: fmt(addDays(today,20)), endDate: fmt(addDays(today,27)), nights:7, travelers:1,
+    budgetCents:900000, spentCents:540000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'✈️', label:'FLIGHTS', spentCents:280000, budgetCents:350000, fillColor:'#5b8dff' },
+      { icon:'🏨', label:'HOTEL', spentCents:260000, budgetCents:350000, fillColor:'#a78bfa' },
+      { icon:'🍜', label:'DINING', spentCents:0, budgetCents:120000, fillColor:'#ffb347' },
+      { icon:'🚖', label:'TRANSPORT', spentCents:0, budgetCents:80000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,20)), event:'Depart JFK → SIN (Business)', icon:'✈️', amountCents:280000, isCovered:true },
+      { date: fmt(addDays(today,21)), event:'Marina Bay Sands check-in', icon:'🏨', amountCents:260000, isCovered:true },
+      { date: fmt(addDays(today,22)), event:'GIC & Temasek investor meetings', icon:'📊', amountCents:0, isCovered:true },
+      { date: fmt(addDays(today,27)), event:'Return SIN → JFK', icon:'✈️', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 38720000,
+  safeToSpendCents: 1080000,
+  monthlyIncomeCents: 2800000,
+  monthlySpendCents: 1200000,
+  subscriptionsTotalMonthlyCents: 48097,
+  subscriptionsWastedMonthlyCents: 3400,
+  sparklineData: [0.68, 0.72, 0.75, 0.78, 0.82, 0.87],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Y — Yuki Yamamoto  |  Yoga Studio Owner · Marcus · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const Y: UserFinancialProfile = {
+  user: { id:'u_y', name:'Yuki Yamamoto', email:'yuki@example.com', avatarInitials:'YY',
+    planTier:'premium', bankName:'Marcus', bankColor:'#003087',
+    onboardedAt: fmt(subDays(today,120)), greeting:'Yuki' },
+  accounts: [
+    { id:'a_y1', userId:'u_y', name:'Marcus Checking', type:'checking', institution:'Marcus',
+      balanceCents:720000, color:'#00f5b0', logoAbbrev:'MARC', updatedAt: fmt(today) },
+    { id:'a_y2', userId:'u_y', name:'Marcus HYSA', type:'savings', institution:'Marcus',
+      balanceCents:3600000, interestRate:5.0, color:'#5b8dff', logoAbbrev:'MARC', updatedAt: fmt(today) },
+    { id:'a_y3', userId:'u_y', name:'Chase Ink Business', type:'credit', institution:'Chase',
+      balanceCents:-180000, dueDate: fmt(addDays(today,13)), color:'#ffb347', logoAbbrev:'CHAS', updatedAt: fmt(today) },
+    { id:'a_y4', userId:'u_y', name:'Fidelity SEP-IRA', type:'investment', institution:'Fidelity',
+      balanceCents:10000000, interestRate:8.9, color:'#a78bfa', logoAbbrev:'FIDL', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_y1', accountId:'a_y1', userId:'u_y', merchant:'Zen Flow Studio Revenue', merchantIcon:'🧘', amountCents:980000, isDebit:false, category:'Income', date: fmt(subDays(today,3)), isSubscription:false },
+    { id:'t_y2', accountId:'a_y1', userId:'u_y', merchant:'Studio Lease', merchantIcon:'🏠', amountCents:480000, isDebit:true, category:'Rent', date: fmt(subDays(today,5)), isSubscription:false },
+    { id:'t_y3', accountId:'a_y3', userId:'u_y', merchant:'Mindbody Business', merchantIcon:'📱', amountCents:12900, isDebit:true, category:'Business', date: fmt(subDays(today,7)), isSubscription:true },
+    { id:'t_y4', accountId:'a_y1', userId:'u_y', merchant:'Yoga Equipment Wholesale', merchantIcon:'🧘', amountCents:48000, isDebit:true, category:'Shopping', date: fmt(subDays(today,10)), isSubscription:false },
+    { id:'t_y5', accountId:'a_y3', userId:'u_y', merchant:'YouTube Premium', merchantIcon:'▶️', amountCents:1399, isDebit:true, category:'Entertainment', date: fmt(subDays(today,14)), isSubscription:true },
+  ],
+  bills: [
+    { id:'b_y1', userId:'u_y', name:'Studio Lease', icon:'🏠', amountCents:480000, dueDate: fmt(addDays(today,20)), source:'manual', status:'upcoming', accountId:'a_y1', color:'#ffb347' },
+    { id:'b_y2', userId:'u_y', name:'Chase Ink', icon:'💳', amountCents:180000, dueDate: fmt(addDays(today,13)), source:'email', status:'upcoming', accountId:'a_y1', color:'#ff5252' },
+    { id:'b_y3', userId:'u_y', name:'Studio Insurance', icon:'🔒', amountCents:24000, dueDate: fmt(addDays(today,6)), source:'email', status:'due_soon', accountId:'a_y1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_y1', userId:'u_y', name:'Mindbody Business', icon:'📱', amountCents:12900, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,7)), category:'Business', isWaste:false, iconBg:'rgba(0,180,120,0.12)' },
+    { id:'s_y2', userId:'u_y', name:'Spotify', icon:'🎵', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,14)), category:'Entertainment', isWaste:false, iconBg:'rgba(30,215,96,0.10)' },
+    { id:'s_y3', userId:'u_y', name:'Apple Music', icon:'🎶', amountCents:1099, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,20)), category:'Entertainment', isWaste:false, iconBg:'rgba(255,45,85,0.12)' },
+    { id:'s_y4', userId:'u_y', name:'Calm', icon:'🧘', amountCents:1499, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Health', isWaste:false, iconBg:'rgba(100,150,255,0.10)' },
+    { id:'s_y5', userId:'u_y', name:'YouTube Premium', icon:'▶️', amountCents:1399, billingCycle:'monthly', lastUsedDaysAgo:28, nextBillingDate: fmt(addDays(today,14)), category:'Entertainment', isWaste:true, iconBg:'rgba(255,0,0,0.10)' },
+  ],
+  alerts: [
+    { id:'al_y1', userId:'u_y', type:'success', icon:'🧘', title:'Studio revenue up 22% this month', description:'Zen Flow hit $9,800 in April — best month since opening. New students up 18%!', timeAgo:'3 days ago', isRead:false, amountCents:980000 },
+    { id:'al_y2', userId:'u_y', type:'danger', icon:'🔒', title:'Studio insurance due in 6 days', description:'$240 annual premium due. Pay from Marcus Checking.', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:24000 },
+    { id:'al_y3', userId:'u_y', type:'warning', icon:'▶️', title:'YouTube Premium unused 28 days', description:'$13.99/mo. No streams this month — switch to free or cancel.', timeAgo:'Yesterday', isRead:false, actionLabel:'Cancel →', amountCents:1399 },
+  ],
+  cashflow: buildCashflow('u_y', 11200, 7200),
+  projection: { thirtyDay: 3400, sixtyDay: 6600, ninetyDay: 10200 },
+  trip: {
+    id:'trip_y1', userId:'u_y', name:'Bali Wellness Retreat', destination:'LAX → Bali',
+    startDate: fmt(addDays(today,30)), endDate: fmt(addDays(today,42)), nights:12, travelers:1,
+    budgetCents:600000, spentCents:280000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'✈️', label:'FLIGHTS', spentCents:180000, budgetCents:220000, fillColor:'#5b8dff' },
+      { icon:'🏡', label:'VILLA', spentCents:100000, budgetCents:220000, fillColor:'#a78bfa' },
+      { icon:'🌿', label:'RETREATS', spentCents:0, budgetCents:100000, fillColor:'#ffb347' },
+      { icon:'🍜', label:'FOOD', spentCents:0, budgetCents:60000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,30)), event:'Depart LAX → DPS', icon:'✈️', amountCents:180000, isCovered:true },
+      { date: fmt(addDays(today,30)), event:'Ubud Villa check-in', icon:'🏡', amountCents:100000, isCovered:true },
+      { date: fmt(addDays(today,31)), event:'Yoga & Meditation Master Class', icon:'🧘', amountCents:0, isCovered:false },
+      { date: fmt(addDays(today,42)), event:'Return DPS → LAX', icon:'✈️', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 16590000,
+  safeToSpendCents: 340000,
+  monthlyIncomeCents: 1120000,
+  monthlySpendCents: 720000,
+  subscriptionsTotalMonthlyCents: 17996,
+  subscriptionsWastedMonthlyCents: 1399,
+  sparklineData: [0.52, 0.56, 0.60, 0.64, 0.68, 0.72],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Z — Zoe Zhang  |  Startup Founder · Vanguard · Premium
+// ═══════════════════════════════════════════════════════════════════════════════
+const Z: UserFinancialProfile = {
+  user: { id:'u_z', name:'Zoe Zhang', email:'zoe@example.com', avatarInitials:'ZZ',
+    planTier:'premium', bankName:'Vanguard', bankColor:'#722f37',
+    onboardedAt: fmt(subDays(today,180)), greeting:'Zoe' },
+  accounts: [
+    { id:'a_z1', userId:'u_z', name:'SVB Checking', type:'checking', institution:'Silicon Valley Bank',
+      balanceCents:8400000, color:'#00f5b0', logoAbbrev:'SVB', updatedAt: fmt(today) },
+    { id:'a_z2', userId:'u_z', name:'Vanguard Money Mkt', type:'savings', institution:'Vanguard',
+      balanceCents:28000000, interestRate:5.2, color:'#5b8dff', logoAbbrev:'VANG', updatedAt: fmt(today) },
+    { id:'a_z3', userId:'u_z', name:'Vanguard Portfolio', type:'investment', institution:'Vanguard',
+      balanceCents:72000000, interestRate:18.4, color:'#a78bfa', logoAbbrev:'VANG', updatedAt: fmt(today) },
+  ],
+  transactions: [
+    { id:'t_z1', accountId:'a_z1', userId:'u_z', merchant:'FlowAI Inc Founder Salary', merchantIcon:'💵', amountCents:8400000, isDebit:false, category:'Income', date: fmt(subDays(today,3)), isSubscription:false },
+    { id:'t_z2', accountId:'a_z1', userId:'u_z', merchant:'AWS Infrastructure', merchantIcon:'☁️', amountCents:240000, isDebit:true, category:'Business', date: fmt(subDays(today,5)), isSubscription:true },
+    { id:'t_z3', accountId:'a_z1', userId:'u_z', merchant:'Notion Team', merchantIcon:'📝', amountCents:1600, isDebit:true, category:'Business', date: fmt(subDays(today,7)), isSubscription:true },
+    { id:'t_z4', accountId:'a_z1', userId:'u_z', merchant:'Nobu Restaurant', merchantIcon:'🍣', amountCents:84000, isDebit:true, category:'Food', date: fmt(subDays(today,9)), isSubscription:false },
+    { id:'t_z5', accountId:'a_z1', userId:'u_z', merchant:'Mortgage', merchantIcon:'🏠', amountCents:840000, isDebit:true, category:'Rent', date: fmt(subDays(today,11)), isSubscription:false },
+  ],
+  bills: [
+    { id:'b_z1', userId:'u_z', name:'Mortgage', icon:'🏠', amountCents:840000, dueDate: fmt(addDays(today,22)), source:'manual', status:'upcoming', accountId:'a_z1', color:'#ffb347' },
+    { id:'b_z2', userId:'u_z', name:'AWS (Monthly)', icon:'☁️', amountCents:240000, dueDate: fmt(addDays(today,5)), source:'email', status:'due_soon', accountId:'a_z1', color:'#ff5252' },
+    { id:'b_z3', userId:'u_z', name:'HOA', icon:'🏡', amountCents:84000, dueDate: fmt(addDays(today,14)), source:'manual', status:'upcoming', accountId:'a_z1', color:'#5b8dff' },
+  ],
+  subscriptions: [
+    { id:'s_z1', userId:'u_z', name:'Notion Team', icon:'📝', amountCents:1600, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,7)), category:'Productivity', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_z2', userId:'u_z', name:'GitHub Enterprise', icon:'🐙', amountCents:19000, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,10)), category:'Development', isWaste:false, iconBg:'rgba(255,255,255,0.08)' },
+    { id:'s_z3', userId:'u_z', name:'Slack Pro', icon:'💬', amountCents:7500, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,15)), category:'Productivity', isWaste:false, iconBg:'rgba(74,21,75,0.12)' },
+    { id:'s_z4', userId:'u_z', name:'Linear', icon:'📐', amountCents:800, billingCycle:'monthly', lastUsedDaysAgo:0, nextBillingDate: fmt(addDays(today,18)), category:'Productivity', isWaste:false, iconBg:'rgba(91,141,255,0.12)' },
+    { id:'s_z5', userId:'u_z', name:'Adobe Creative Cloud', icon:'🎨', amountCents:5999, billingCycle:'monthly', lastUsedDaysAgo:62, nextBillingDate: fmt(addDays(today,5)), category:'Design', isWaste:true, iconBg:'rgba(255,50,50,0.12)' },
+  ],
+  alerts: [
+    { id:'al_z1', userId:'u_z', type:'success', icon:'🚀', title:'Series A term sheet received', description:'Sequoia & Founders Fund term sheets in. Lead at $18M pre-money. Milestone!', timeAgo:'Today', isRead:false, actionLabel:'Review →', amountCents:0 },
+    { id:'al_z2', userId:'u_z', type:'danger', icon:'☁️', title:'AWS bill due in 5 days', description:'$2,400 cloud infrastructure due. Pay from SVB Checking (bal: $84,000).', timeAgo:'Today', isRead:false, actionLabel:'Pay Now →', amountCents:240000 },
+    { id:'al_z3', userId:'u_z', type:'warning', icon:'🎨', title:'Adobe CC unused 62 days', description:'$59.99/mo, no files opened. Designers use Figma. Cancel to save $720/yr.', timeAgo:'2 days ago', isRead:false, actionLabel:'Cancel →', amountCents:5999 },
+  ],
+  cashflow: buildCashflow('u_z', 84000, 24000),
+  projection: { thirtyDay: 38000, sixtyDay: 74000, ninetyDay: 112000 },
+  trip: {
+    id:'trip_z1', userId:'u_z', name:'NYC Series A Roadshow', destination:'SFO → New York',
+    startDate: fmt(addDays(today,5)), endDate: fmt(addDays(today,9)), nights:4, travelers:1,
+    budgetCents:480000, spentCents:280000, isOnTrack:true, detectedFromEmail:true,
+    categories: [
+      { icon:'✈️', label:'FLIGHTS', spentCents:84000, budgetCents:100000, fillColor:'#5b8dff' },
+      { icon:'🏨', label:'HOTEL', spentCents:196000, budgetCents:220000, fillColor:'#a78bfa' },
+      { icon:'🍣', label:'DINNERS', spentCents:0, budgetCents:100000, fillColor:'#ffb347' },
+      { icon:'🚖', label:'TRANSPORT', spentCents:0, budgetCents:60000, fillColor:'#00f5b0' },
+    ],
+    itinerary: [
+      { date: fmt(addDays(today,5)), event:'Depart SFO → JFK', icon:'✈️', amountCents:84000, isCovered:true },
+      { date: fmt(addDays(today,5)), event:'The Mark Hotel check-in', icon:'🏨', amountCents:196000, isCovered:true },
+      { date: fmt(addDays(today,6)), event:'Sequoia NYC — Partner Meeting', icon:'🚀', amountCents:0, isCovered:true },
+      { date: fmt(addDays(today,7)), event:'Founders Fund — Partner Meeting', icon:'🚀', amountCents:0, isCovered:true },
+      { date: fmt(addDays(today,9)), event:'Return JFK → SFO', icon:'✈️', amountCents:0, isCovered:false },
+    ],
+  },
+  netWorthCents: 105000000,
+  safeToSpendCents: 3800000,
+  monthlyIncomeCents: 8400000,
+  monthlySpendCents: 2400000,
+  subscriptionsTotalMonthlyCents: 34899,
+  subscriptionsWastedMonthlyCents: 5999,
+  sparklineData: [0.88, 0.90, 0.92, 0.93, 0.95, 0.97],
+};
 
 // ─── EXPORT ──────────────────────────────────────────────────────────────────
 

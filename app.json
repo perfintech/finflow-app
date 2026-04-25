@@ -22,7 +22,9 @@
         "NSPhotoLibraryUsageDescription": "FinFlow may access your photo library for profile photos."
       },
       "entitlements": {
-        "com.apple.developer.associated-domains": ["applinks:finflow.app"]
+        "com.apple.developer.associated-domains": [
+          "applinks:finflow.app"
+        ]
       }
     },
     "android": {
@@ -61,7 +63,8 @@
           "image": "./assets/splash.png",
           "imageWidth": 200
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "scheme": "finflow",
     "experiments": {

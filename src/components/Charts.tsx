@@ -1,4 +1,4 @@
-import Svg, { Path, Circle, G } from 'react-native-svg';
+import Svg, { Path, Circle, G, Rect } from 'react-native-svg';
 import { colors } from '@/constants/theme';
 
 interface SparklineChartProps {
@@ -102,7 +102,7 @@ export function BarChart({ data, height = 200, width = 240, barColor = colors.ac
 
           return (
             <G key={`bar-${i}`}>
-              <rect x={x} y={y} width={barWidth} height={barHeight} fill={barColor} rx={4} />
+              <Rect x={x} y={y} width={barWidth} height={barHeight} fill={barColor} rx={4} />
             </G>
           );
         })}
